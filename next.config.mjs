@@ -12,8 +12,13 @@ const nextConfig = {
     ],
   },
   experimental: {
-    // Puppeteer / heavy server-only deps are kept out of the client bundle.
-    serverComponentsExternalPackages: ["@supabase/supabase-js"],
+    // Heavy server-only deps are kept out of the bundle (Chromium/Puppeteer must
+    // load as external native modules at runtime).
+    serverComponentsExternalPackages: [
+      "@supabase/supabase-js",
+      "puppeteer-core",
+      "@sparticuz/chromium",
+    ],
   },
 };
 

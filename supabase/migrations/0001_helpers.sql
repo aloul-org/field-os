@@ -3,6 +3,10 @@
 -- Create these FIRST — every table's RLS policy depends on them.
 -- ============================================================================
 
+-- These functions reference team_members (created in 0003). Skip body
+-- validation so the functions can be created before that table exists.
+set check_function_bodies = off;
+
 -- Returns every company the current user belongs to (owner or accepted member).
 create or replace function get_user_company_ids()
 returns setof uuid as $$

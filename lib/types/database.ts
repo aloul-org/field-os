@@ -643,6 +643,14 @@ export interface Database {
         Args: { p_company_id: string };
         Returns: string;
       };
+      get_public_estimate: {
+        Args: { p_token: string };
+        Returns: Json;
+      };
+      get_public_invoice: {
+        Args: { p_token: string };
+        Returns: Json;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

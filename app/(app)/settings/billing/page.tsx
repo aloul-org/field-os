@@ -1,12 +1,18 @@
-import { SettingsPlaceholder } from "@/components/settings/SettingsPlaceholder";
+import { requireSection } from "@/lib/auth/session";
+import { BillingPanel } from "@/components/settings/BillingPanel";
 
 export const metadata = { title: "Billing" };
 
-export default function BillingSettingsPage() {
+export default async function BillingSettingsPage() {
+  const ctx = await requireSection("billing");
+
   return (
-    <SettingsPlaceholder
-      title="Billing & subscription"
-      description="Manage your plan, payment method and the 0.5% platform fee. Wired up with Stripe in Phase 2."
+    <BillingPanel
+      currentPlan={ctx.company.subscription_plan}
+      status={ctx.company.subscription_status}
+      region={ctx.company.region}
+      hasSubscription={Boolean(ctx.company.stripe_subscription_id)}
+      isOwner={ctx.role === "owner"}
     />
   );
 }

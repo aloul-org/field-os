@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { publicEnv } from "@/lib/env";
 import type { NavItem } from "@/components/layout/nav-items";
+import { NAV_ICON_MAP } from "@/components/layout/nav-icon-map";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
@@ -26,7 +27,8 @@ export function Sidebar({ items }: { items: NavItem[] }) {
         <span className="truncate">{publicEnv.appName}</span>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {items.map(({ key, href, icon: Icon }) => {
+        {items.map(({ key, href, icon }) => {
+          const Icon = NAV_ICON_MAP[icon];
           const active = isActive(pathname, href);
           return (
             <Link

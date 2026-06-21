@@ -61,6 +61,21 @@ export const getActiveContext = cache(async (): Promise<ActiveContext | null> =>
   };
 });
 
+/**
+ * Route-handler variant of access control. Returns the context or null instead
+ * of redirecting (API routes return JSON errors, never HTML redirects).
+ */
+export async function getRouteContext(
+  section?: AppSection
+): Promise<{ ctx: ActiveContext } | { error: "unauthorized" | "forbidden" }> {
+  const ctx = await getActiveContext();
+  if (!ctx) return { error: "unauthorized" };
+  if (section && ctx.role !== "technician" && !canAccess(ctx.role, section)) {
+    return { error: "forbidden" };
+  }
+  return { ctx };
+}
+
 /** Require an authenticated user; redirect to /login otherwise. */
 export async function requireUser(): Promise<User> {
   const user = await getUser();

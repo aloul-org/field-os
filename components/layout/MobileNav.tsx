@@ -8,6 +8,7 @@ import { MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/components/layout/nav-items";
+import { NAV_ICON_MAP } from "@/components/layout/nav-icon-map";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,8 @@ export function MobileNav({ items }: { items: NavItem[] }) {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t bg-card lg:hidden">
-      {primary.map(({ key, href, icon: Icon }) => {
+      {primary.map(({ key, href, icon }) => {
+        const Icon = NAV_ICON_MAP[icon];
         const active = isActive(pathname, href);
         return (
           <Link
@@ -64,17 +66,20 @@ export function MobileNav({ items }: { items: NavItem[] }) {
               <DialogTitle>Menu</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-3 gap-3">
-              {overflow.map(({ key, href, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMoreOpen(false)}
-                  className="flex flex-col items-center gap-2 rounded-lg border p-4 text-sm hover:bg-muted"
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-center text-xs">{t(key)}</span>
-                </Link>
-              ))}
+              {overflow.map(({ key, href, icon }) => {
+                const Icon = NAV_ICON_MAP[icon];
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMoreOpen(false)}
+                    className="flex flex-col items-center gap-2 rounded-lg border p-4 text-sm hover:bg-muted"
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <span className="text-center text-xs">{t(key)}</span>
+                  </Link>
+                );
+              })}
             </div>
           </DialogContent>
         </Dialog>
