@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FieldOS AI — Setup Guide</title>
+<style>
+  :root{
+    --teal:#0f766e; --teal-d:#0b5c55; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f8fafc; --card:#ffffff; --code:#0b1220; --code-ink:#e2e8f0;
+    --warn-bg:#fffbeb; --warn-line:#f59e0b; --ok-bg:#ecfdf5; --ok-line:#10b981;
+    --info-bg:#eff6ff; --info-line:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:48px 24px}
+  header .wrap{max-width:900px;margin:0 auto}
+  header .logo{display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:20px}
+  header .logo .badge{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:18px}
+  header h1{margin:18px 0 6px;font-size:32px;letter-spacing:-.02em}
+  header p{margin:0;opacity:.9;max-width:60ch}
+  .layout{max-width:900px;margin:0 auto;padding:0 24px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:28px 0}
+  nav.toc h2{margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  nav.toc a{color:var(--teal);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin:0 0 22px}
+  section h2{margin:0 0 4px;font-size:22px;letter-spacing:-.01em}
+  section h2 .step{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--teal);color:#fff;font-size:15px;margin-right:10px;vertical-align:middle}
+  section h3{margin:22px 0 8px;font-size:16px}
+  p,li{color:#1e293b}
+  code{background:#eef2f7;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
+  pre{background:var(--code);color:var(--code-ink);padding:16px 18px;border-radius:10px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.55}
+  pre code{background:none;padding:0;color:inherit}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  td code{font-size:.85em;white-space:nowrap}
+  .note{border-radius:10px;padding:12px 16px;margin:14px 0;border-left:4px solid}
+  .note.info{background:var(--info-bg);border-color:var(--info-line)}
+  .note.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+  .note.ok{background:var(--ok-bg);border-color:var(--ok-line)}
+  .note strong{display:block;margin-bottom:2px}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e2e8f0;color:#334155;vertical-align:middle}
+  .pill.p1{background:#ccfbf1;color:#0f766e}
+  .pill.later{background:#fef3c7;color:#92400e}
+  kbd{background:#1e293b;color:#fff;border-radius:6px;padding:1px 7px;font-size:12px;font-family:ui-monospace,monospace}
+  footer{max-width:900px;margin:10px auto 60px;padding:0 24px;color:var(--muted);font-size:13px}
+  a{color:var(--teal)}
+  .check{list-style:none;padding-left:0}
+  .check li{padding-left:28px;position:relative;margin:6px 0}
+  .check li:before{content:"✓";position:absolute;left:0;top:0;color:var(--teal);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo"><span class="badge">F</span> FieldOS AI</div>
+    <h1>Project Setup Guide</h1>
+    <p>Everything you need to install, configure, run and deploy FieldOS AI — from a clean machine to a live Vercel deployment. Phase&nbsp;1 (Foundation) is production-ready.</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#prereq">Prerequisites</a></li>
+      <li><a href="#install">Install the project</a></li>
+      <li><a href="#supabase">Create the Supabase project</a></li>
+      <li><a href="#migrations">Apply the database schema</a></li>
+      <li><a href="#oauth">Enable Google login (optional)</a></li>
+      <li><a href="#env">Configure environment variables</a></li>
+      <li><a href="#seed">Seed demo data</a></li>
+      <li><a href="#run">Run locally</a></li>
+      <li><a href="#deploy">Deploy to Vercel</a></li>
+      <li><a href="#postdeploy">Post-deploy checklist</a></li>
+      <li><a href="#integrations">Later-phase integrations</a></li>
+      <li><a href="#trouble">Troubleshooting</a></li>
+    </ol>
+  </nav>
+
+  <div class="note info">
+    <strong>What's in this build</strong>
+    Phase&nbsp;1 is complete: auth, the 6-step onboarding wizard, the office app shell, the
+    dashboard, the full CRM (customers, properties, timeline) and company settings, plus the
+    public marketing site and the complete database schema for every later module.
+    To run it you only need a <em>Supabase</em> project. The other services
+    (Anthropic, Stripe, Twilio, …) are only required as their modules ship in later phases.
+  </div>
+
+  <!-- 1 -->
+  <section id="prereq">
+    <h2><span class="step">1</span>Prerequisites</h2>
+    <ul>
+      <li><strong>Node.js 18.18+</strong> (Node 20 or 22 recommended). Check with <code>node -v</code>.</li>
+      <li><strong>npm 9+</strong> (ships with Node). Check with <code>npm -v</code>.</li>
+      <li><strong>Git</strong>.</li>
+      <li>A free <strong>Supabase</strong> account — <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
+      <li>For deployment: a <strong>Vercel</strong> account — <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a>.</li>
+      <li><em>Optional now, needed in later phases:</em> Anthropic, OpenAI, Stripe, Twilio, Resend and Google Maps accounts.</li>
+    </ul>
+  </section>
+
+  <!-- 2 -->
+  <section id="install">
+    <h2><span class="step">2</span>Install the project</h2>
+    <p>From the project root (the folder containing <code>package.json</code>):</p>
+<pre><code>npm install</code></pre>
+    <p>This installs Next.js 14, Tailwind, the Supabase SDK and everything else. It takes a minute or two the first time.</p>
+    <div class="note info">
+      <strong>Windows note</strong>
+      All commands work in PowerShell, Git Bash or the VS Code terminal. Use forward slashes in paths.
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="supabase">
+    <h2><span class="step">3</span>Create the Supabase project</h2>
+    <ol>
+      <li>Go to <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">the Supabase dashboard</a> and click <strong>New project</strong>.</li>
+      <li>Pick a name, a strong database password, and a <strong>region close to your users</strong> (London / Frankfurt for UK&nbsp;&amp;&nbsp;DE — also helps GDPR).</li>
+      <li>Wait ~2 minutes for it to provision.</li>
+      <li>Open <strong>Project Settings → API</strong> and copy these three values — you'll paste them into <code>.env.local</code> in step&nbsp;6:
+        <ul>
+          <li><strong>Project URL</strong> → <code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+          <li><strong>anon / public key</strong> → <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+          <li><strong>service_role key</strong> → <code>SUPABASE_SERVICE_ROLE_KEY</code> <span class="pill">keep secret</span></li>
+        </ul>
+      </li>
+    </ol>
+    <div class="note warn">
+      <strong>Never expose the service_role key to the browser.</strong>
+      It bypasses Row Level Security and is only used server-side (cron jobs, webhooks, the seed script).
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="migrations">
+    <h2><span class="step">4</span>Apply the database schema</h2>
+    <p>The schema lives in <code>supabase/migrations/</code> as numbered files (<code>0001</code>–<code>0014</code>). They <strong>must run in order</strong> — the helper functions in <code>0001</code> are used by every table's security policy. This also creates the Storage buckets automatically.</p>
+
+    <h3>Option A — Supabase CLI (recommended)</h3>
+<pre><code># Install the CLI once (https://supabase.com/docs/guides/cli)
+npm install -g supabase
+
+# Link to your project (find the ref in the dashboard URL)
+supabase link --project-ref &lt;your-project-ref&gt;
+
+# Push every migration in order
+supabase db push</code></pre>
+
+    <h3>Option B — SQL Editor (no CLI)</h3>
+    <ol>
+      <li>In the dashboard open <strong>SQL Editor → New query</strong>.</li>
+      <li>Open each file in <code>supabase/migrations/</code> in ascending order (<code>0001_helpers.sql</code> first), paste its contents, and click <strong>Run</strong>.</li>
+      <li>Repeat through <code>0014_storage.sql</code>.</li>
+    </ol>
+
+    <div class="note ok">
+      <strong>Verify it worked</strong>
+      In <strong>Table Editor</strong> you should now see <code>companies</code>, <code>team_members</code>, <code>customers</code>, <code>jobs</code>, <code>estimates</code>, <code>invoices</code> and more. In <strong>Storage</strong> you should see the buckets <code>logos</code>, <code>pdfs</code>, <code>job-photos</code>, <code>voice-recordings</code>, <code>signatures</code>.
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="oauth">
+    <h2><span class="step">5</span>Enable Google login <span class="pill">optional</span></h2>
+    <p>Email/password works out of the box. To also offer "Continue with Google":</p>
+    <ol>
+      <li>In Supabase: <strong>Authentication → Providers → Google</strong>, toggle it on.</li>
+      <li>Create an OAuth client in the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a> and paste its <strong>Client ID</strong> and <strong>Client secret</strong> into Supabase.</li>
+      <li>Add the redirect URL Supabase shows you to the Google client's "Authorized redirect URIs".</li>
+    </ol>
+    <p>The app's own callback route is <code>/auth/callback</code> — you'll register that in step&nbsp;10.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="env">
+    <h2><span class="step">6</span>Configure environment variables</h2>
+    <p>Copy the template, then edit <code>.env.local</code>:</p>
+<pre><code># macOS / Linux / Git Bash
+cp .env.example .env.local
+
+# PowerShell
+Copy-Item .env.example .env.local</code></pre>
+    <p>For Phase&nbsp;1 you only need the three Supabase values and the two app values. Everything else can stay blank until its phase.</p>
+
+    <table>
+      <thead><tr><th>Variable</th><th>Needed for</th><th>Where to get it</th></tr></thead>
+      <tbody>
+        <tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API</td></tr>
+        <tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API</td></tr>
+        <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API (secret)</td></tr>
+        <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td><span class="pill p1">Phase 1</span></td><td><code>http://localhost:3000</code> locally; your domain in prod</td></tr>
+        <tr><td><code>NEXT_PUBLIC_APP_NAME</code></td><td><span class="pill p1">Phase 1</span></td><td><code>FieldOS AI</code></td></tr>
+        <tr><td><code>CRON_SECRET</code></td><td><span class="pill p1">Phase 1</span></td><td>Any long random string (used by background jobs)</td></tr>
+        <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="pill later">Phase 2+</span></td><td><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a></td></tr>
+        <tr><td><code>OPENAI_API_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>OpenAI (Whisper transcription only)</td></tr>
+        <tr><td><code>STRIPE_SECRET_KEY</code> + price IDs</td><td><span class="pill later">Phase 2</span></td><td>Stripe dashboard → Developers</td></tr>
+        <tr><td><code>TWILIO_*</code></td><td><span class="pill later">Phase 3</span></td><td>Twilio console (Voice/SMS/WhatsApp)</td></tr>
+        <tr><td><code>RESEND_API_KEY</code></td><td><span class="pill later">Phase 2</span></td><td><a href="https://resend.com" target="_blank" rel="noopener">resend.com</a></td></tr>
+        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>Google Cloud → Maps Platform</td></tr>
+        <tr><td><code>NEXT_PUBLIC_MAPBOX_TOKEN</code></td><td><span class="pill later">Phase 4</span></td><td><a href="https://mapbox.com" target="_blank" rel="noopener">mapbox.com</a> (map rendering)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note info">
+      <strong>Good to know</strong>
+      <code>lib/env.ts</code> reads server secrets lazily and throws a clear error only when a still-unconfigured feature is actually used — so a missing Stripe key won't break Phase&nbsp;1 pages.
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="seed">
+    <h2><span class="step">7</span>Seed demo data <span class="pill">optional</span></h2>
+    <p>Populate a realistic demo company so the dashboard and CRM aren't empty:</p>
+<pre><code>npm run seed</code></pre>
+    <p>This creates:</p>
+    <ul class="check">
+      <li>A login: <code>demo@fieldos.ai</code> / <code>demo1234</code></li>
+      <li>Company "Apex Heating &amp; Plumbing" with 4 team members</li>
+      <li>8 customers, 10 properties, 15 leads, 12 estimates, 8 jobs, 6 invoices, materials &amp; renewal plans</li>
+    </ul>
+    <div class="note warn">
+      <strong>Requires real Supabase keys + applied migrations.</strong>
+      The seed uses the <code>service_role</code> key. It safely deletes and recreates the demo account each run, so it's idempotent.
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="run">
+    <h2><span class="step">8</span>Run locally</h2>
+<pre><code>npm run dev</code></pre>
+    <p>Open <a href="http://localhost:3000" target="_blank" rel="noopener">http://localhost:3000</a>. You'll see the marketing site; click <strong>Start free trial</strong> to register, or log in with the seeded demo account.</p>
+    <p>Useful commands:</p>
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm run dev</code></td><td>Start the dev server with hot reload</td></tr>
+        <tr><td><code>npm run build</code></td><td>Production build (also runs type &amp; lint checks)</td></tr>
+        <tr><td><code>npm run start</code></td><td>Serve the production build locally</td></tr>
+        <tr><td><code>npm run typecheck</code></td><td><code>tsc --noEmit</code> — type check only</td></tr>
+        <tr><td><code>npm run lint</code></td><td>ESLint</td></tr>
+        <tr><td><code>npm run seed</code></td><td>(Re)seed the demo data</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9 -->
+  <section id="deploy">
+    <h2><span class="step">9</span>Deploy to Vercel</h2>
+    <ol>
+      <li>Push the repo to GitHub (or GitLab/Bitbucket).</li>
+      <li>In Vercel, click <strong>Add New → Project</strong> and import the repository. Vercel auto-detects Next.js — keep the defaults (Build command <code>next build</code>, output handled automatically).</li>
+      <li>Under <strong>Settings → Environment Variables</strong>, add the same keys from your <code>.env.local</code>. At minimum the three Supabase keys, <code>NEXT_PUBLIC_APP_NAME</code> and <code>CRON_SECRET</code>.</li>
+      <li>Set <code>NEXT_PUBLIC_APP_URL</code> to your real deployment URL, e.g. <code>https://app.fieldos.ai</code> (or the <code>*.vercel.app</code> URL).</li>
+      <li>Click <strong>Deploy</strong>.</li>
+    </ol>
+    <div class="note info">
+      <strong>Apply migrations to your production Supabase project too.</strong>
+      Use a dedicated Supabase project for production (separate from local dev) and run the same migrations against it.
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section id="postdeploy">
+    <h2><span class="step">10</span>Post-deploy checklist</h2>
+    <p>In your <strong>production</strong> Supabase project, go to <strong>Authentication → URL Configuration</strong> and set:</p>
+    <ul>
+      <li><strong>Site URL</strong>: your deployment URL (e.g. <code>https://app.fieldos.ai</code>).</li>
+      <li><strong>Redirect URLs</strong>: add <code>https://your-domain/auth/callback</code> (and your local <code>http://localhost:3000/auth/callback</code> for dev).</li>
+    </ul>
+    <p>Then verify:</p>
+    <ul class="check">
+      <li>Register a new account → you're taken into the onboarding wizard.</li>
+      <li>Complete onboarding → you land on the dashboard.</li>
+      <li>Create a customer and a property → they appear and persist.</li>
+      <li>Log out and back in → session works; Google login works (if enabled).</li>
+    </ul>
+  </section>
+
+  <!-- 11 -->
+  <section id="integrations">
+    <h2><span class="step">11</span>Later-phase integrations</h2>
+    <p>These are <strong>not required for Phase&nbsp;1</strong>. Add each key when you build its module — the relevant routes will start working once the key is present.</p>
+    <table>
+      <thead><tr><th>Service</th><th>Phase</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Anthropic (Claude)</strong></td><td>2+</td><td>Estimating, lead scoring, summaries, AI CFO/Coach, vision photo estimates</td></tr>
+        <tr><td><strong>Stripe</strong></td><td>2</td><td>Subscription billing + Connect/Payment Links (0.5% fee) for invoices</td></tr>
+        <tr><td><strong>Resend</strong></td><td>2</td><td>Transactional email (quotes, invoices, team invites)</td></tr>
+        <tr><td><strong>Twilio</strong></td><td>3</td><td>AI voice receptionist, WhatsApp/SMS leads &amp; follow-ups</td></tr>
+        <tr><td><strong>OpenAI Whisper</strong></td><td>4</td><td>Voice transcription for job reports</td></tr>
+        <tr><td><strong>Google Maps + Mapbox</strong></td><td>4</td><td>Geocoding, routing/traffic (Google) + map rendering (Mapbox)</td></tr>
+      </tbody>
+    </table>
+    <div class="note info">
+      <strong>Cron jobs</strong>
+      Scheduled tasks (daily digests, overdue checks, renewals, queue processing) run as Vercel Cron routes guarded by <code>CRON_SECRET</code>. A <code>vercel.json</code> with the cron schedule is added when those routes ship.
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section id="trouble">
+    <h2><span class="step">12</span>Troubleshooting</h2>
+
+    <h3>"Missing required environment variable …"</h3>
+    <p>A feature tried to use a key that isn't set. Add it to <code>.env.local</code> (local) or Vercel env vars (prod) and restart/redeploy.</p>
+
+    <h3>Login works but no data loads / "Could not load …"</h3>
+    <p>Almost always the migrations weren't applied (or were applied out of order) against the Supabase project the app points to. Re-check step&nbsp;4 and confirm the tables exist.</p>
+
+    <h3>Redirected to login in a loop after signing in</h3>
+    <p>Check the Supabase <strong>Site URL</strong> and <strong>Redirect URLs</strong> (step&nbsp;10) match your actual domain, and that <code>NEXT_PUBLIC_APP_URL</code> is correct.</p>
+
+    <h3><code>npm run seed</code> exits with "Set NEXT_PUBLIC_SUPABASE_URL…"</h3>
+    <p>Your <code>.env.local</code> still has the placeholder URL. Paste the real Supabase values first.</p>
+
+    <h3>Build fails on an ESLint "unused variable" error</h3>
+    <p>The production build is lint-gated. Remove the unused import/variable it names, then rebuild.</p>
+
+    <h3>Language is wrong</h3>
+    <p>The UI locale follows the company's <em>Language</em> setting (stored in a cookie), not the URL. Change it in <strong>Settings</strong> or during onboarding.</p>
+  </section>
+
+</div>
+
+<footer>
+  FieldOS AI — generated setup guide. For the full product specification see <code>1.PLATFORM_PROMPT.md</code>;
+  for database details see <code>supabase/README.md</code>.
+</footer>
+</body>
+</html>
