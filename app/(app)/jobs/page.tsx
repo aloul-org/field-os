@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { Briefcase } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { JobTicketCard } from "@/components/shared/JobTicketCard";
 import { Badge } from "@/components/ui/badge";
 import type { JobStatus } from "@/lib/types/database";
 
@@ -65,11 +65,7 @@ export default async function JobsPage() {
                 </div>
                 <div className="space-y-2">
                   {cards.map((j) => (
-                    <Link
-                      key={j.id}
-                      href={`/jobs/${j.id}`}
-                      className="block rounded-lg border bg-card p-3 text-sm shadow-sm transition-colors hover:bg-muted/50"
-                    >
+                    <JobTicketCard key={j.id} href={`/jobs/${j.id}`} className="p-3 text-sm">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium leading-tight">{j.title}</p>
                         {j.priority === "emergency" && (
@@ -79,10 +75,10 @@ export default async function JobsPage() {
                         )}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {j.job_number}
+                        <span className="font-mono">{j.job_number}</span>
                         {j.customers ? ` · ${j.customers.name}` : ""}
                       </p>
-                    </Link>
+                    </JobTicketCard>
                   ))}
                   {cards.length === 0 && (
                     <p className="rounded-lg border border-dashed p-3 text-center text-xs text-muted-foreground">

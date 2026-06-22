@@ -3,83 +3,92 @@
 @tailwind utilities;
 
 /*
- * FieldOS AI design tokens. Single design language shared across the three UI
- * surfaces (Office App, Technician App, Customer surfaces). Primary is the brand
- * teal (#0F766E -> hsl(175 77% 26%)); status tokens (success/warning/destructive)
- * drive lead scores, job statuses, invoice states and win-probability badges.
- * All colours are HSL channel triples so Tailwind can apply opacity modifiers.
+ * FieldOS AI design tokens (design-prompt.md). Signal Orange brand
+ * (#FF5A1F -> hsl(16 100% 56%)) on a warm "paper" neutral base, not the
+ * cliché cream/terracotta combo. Status tokens (success/warning/destructive)
+ * are deliberately distinct hues from the brand orange. All colours are HSL
+ * channel triples so Tailwind can apply opacity modifiers.
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 36 10% 97%;
+    --foreground: 210 12% 9%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 40 8% 94%;
+    --card-foreground: 210 12% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 210 12% 9%;
 
-    --primary: 175 77% 26%;
+    --primary: 16 100% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 40 8% 94%;
+    --secondary-foreground: 210 12% 9%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 40 8% 94%;
+    --muted-foreground: 206 10% 40%;
 
-    --accent: 175 60% 94%;
-    --accent-foreground: 175 77% 20%;
+    --accent: 23 75% 95%;
+    --accent-foreground: 15 88% 40%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 36%;
+    --success: 142 72% 29%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
+    --warning: 41 96% 40%;
+    --warning-foreground: 210 12% 9%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 175 77% 26%;
+    --border: 41 8% 87%;
+    --input: 41 8% 87%;
+    --ring: 16 100% 56%;
 
     --radius: 0.625rem;
+
+    /* Shadows derived from --color-ink-900 at low opacity, not the default cool
+       grey/blue most UI kits ship with — cards should read as paper, not glass. */
+    --shadow-card: 0 1px 2px rgba(21, 24, 27, 0.04), 0 4px 12px rgba(21, 24, 27, 0.06);
+    --shadow-card-hover: 0 2px 4px rgba(21, 24, 27, 0.06), 0 8px 20px rgba(21, 24, 27, 0.1);
   }
 
+  /* Technician App only (v1) — built on the ink-900 base for outdoor glare. */
   .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
+    --background: 210 12% 9%;
+    --foreground: 36 10% 97%;
 
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
+    --card: 207 9% 19%;
+    --card-foreground: 36 10% 97%;
+    --popover: 207 9% 19%;
+    --popover-foreground: 36 10% 97%;
 
-    --primary: 175 70% 41%;
-    --primary-foreground: 222 47% 7%;
+    --primary: 16 100% 56%;
+    --primary-foreground: 210 12% 9%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 207 9% 19%;
+    --secondary-foreground: 36 10% 97%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 207 9% 19%;
+    --muted-foreground: 206 8% 65%;
 
-    --accent: 175 50% 18%;
-    --accent-foreground: 175 70% 80%;
+    --accent: 207 9% 24%;
+    --accent-foreground: 23 100% 73%;
 
     --destructive: 0 63% 50%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 36 10% 97%;
 
     --success: 142 64% 42%;
-    --success-foreground: 210 40% 98%;
+    --success-foreground: 36 10% 97%;
 
     --warning: 38 92% 55%;
-    --warning-foreground: 222 47% 7%;
+    --warning-foreground: 210 12% 9%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 175 70% 41%;
+    --border: 207 9% 24%;
+    --input: 207 9% 24%;
+    --ring: 16 100% 56%;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -96,5 +105,45 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* The Job Ticket — signature card treatment (design-prompt.md). A dashed
+   top "tear line" with two punched notches, evoking a carbon-copy work-order
+   pad. Used on the primary card per list view (estimate/invoice/job rows),
+   not on every panel — see callers for the restraint rule. */
+@layer components {
+  .job-ticket {
+    position: relative;
+    border-top-style: dashed;
+    border-top-width: 2px;
+    border-top-color: hsl(var(--border));
+  }
+  .job-ticket::before,
+  .job-ticket::after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: hsl(var(--background));
+  }
+  .job-ticket::before {
+    left: 12px;
+  }
+  .job-ticket::after {
+    right: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

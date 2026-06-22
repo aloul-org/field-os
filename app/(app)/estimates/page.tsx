@@ -7,9 +7,9 @@ import { canWrite } from "@/lib/auth/roles";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { JobTicketCard } from "@/components/shared/JobTicketCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import type { EstimateStatus } from "@/lib/types/database";
 
 export const metadata = { title: "Estimates" };
@@ -64,20 +64,20 @@ export default async function EstimatesPage() {
           }
         />
       ) : (
-        <Card className="divide-y">
+        <div className="space-y-3">
           {estimates.map((e) => {
             const customer = e.customers as unknown as { name: string } | null;
             return (
-              <Link
+              <JobTicketCard
                 key={e.id}
                 href={`/estimates/${e.id}`}
-                className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/50"
+                className="flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{e.job_title}</p>
                   <p className="truncate text-sm text-muted-foreground">
-                    {e.estimate_number} · {customer?.name ?? "—"} ·{" "}
-                    {formatDate(e.created_at, region)}
+                    <span className="font-mono">{e.estimate_number}</span> ·{" "}
+                    {customer?.name ?? "—"} · {formatDate(e.created_at, region)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
@@ -86,17 +86,17 @@ export default async function EstimatesPage() {
                       {e.win_probability}% win
                     </span>
                   )}
-                  <span className="hidden font-medium sm:block">
+                  <span className="hidden font-display font-medium sm:block">
                     {formatCurrency(Number(e.total_inc_vat), region)}
                   </span>
                   <Badge variant={STATUS_VARIANT[e.status]} className="capitalize">
                     {e.status}
                   </Badge>
                 </div>
-              </Link>
+              </JobTicketCard>
             );
           })}
-        </Card>
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Receipt } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
@@ -6,8 +5,8 @@ import { requireSection } from "@/lib/auth/session";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { JobTicketCard } from "@/components/shared/JobTicketCard";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import type { InvoiceStatus } from "@/lib/types/database";
 
 export const metadata = { title: "Invoices" };
@@ -43,33 +42,33 @@ export default async function InvoicesPage() {
           description="Invoices are created from completed jobs or accepted estimates."
         />
       ) : (
-        <Card className="divide-y">
+        <div className="space-y-3">
           {invoices.map((inv) => {
             const customer = inv.customers as unknown as { name: string } | null;
             return (
-              <Link
+              <JobTicketCard
                 key={inv.id}
                 href={`/invoices/${inv.id}`}
-                className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/50"
+                className="flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{inv.invoice_number}</p>
+                  <p className="truncate font-mono font-medium">{inv.invoice_number}</p>
                   <p className="truncate text-sm text-muted-foreground">
                     {customer?.name ?? "—"} · due {formatDate(inv.due_date, region)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="hidden font-medium sm:block">
+                  <span className="hidden font-display font-medium sm:block">
                     {formatCurrency(Number(inv.total_inc_vat), region)}
                   </span>
                   <Badge variant={STATUS_VARIANT[inv.status]} className="capitalize">
                     {inv.status}
                   </Badge>
                 </div>
-              </Link>
+              </JobTicketCard>
             );
           })}
-        </Card>
+        </div>
       )}
     </div>
   );

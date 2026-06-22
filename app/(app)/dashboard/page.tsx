@@ -130,7 +130,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-2xl font-bold tracking-tight">
           {t(greetingKey())}, {ctx.member.name.split(" ")[0]}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -138,24 +138,33 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label={t("jobsToday")} value={jobsToday.count ?? 0} icon={Briefcase} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
+          size="hero"
+          className="animate-fade-rise sm:col-span-2 lg:col-span-2 lg:row-span-2"
+          label={t("revenueThisMonth")}
+          value={formatCurrency(revenueTotal, region)}
+          icon={TrendingUp}
+          tone="success"
+        />
+        <StatCard
+          className="animate-fade-rise [animation-delay:80ms]"
+          label={t("jobsToday")}
+          value={jobsToday.count ?? 0}
+          icon={Briefcase}
+        />
+        <StatCard
+          className="animate-fade-rise [animation-delay:160ms]"
           label={t("estimatesPending")}
           value={estimatesPending.count ?? 0}
           icon={FileText}
         />
         <StatCard
+          className="animate-fade-rise [animation-delay:240ms]"
           label={t("outstandingInvoices")}
           value={formatCurrency(outstandingTotal, region)}
           icon={Receipt}
           tone={outstandingTotal > 0 ? "warning" : "default"}
-        />
-        <StatCard
-          label={t("revenueThisMonth")}
-          value={formatCurrency(revenueTotal, region)}
-          icon={TrendingUp}
-          tone="success"
         />
       </div>
 

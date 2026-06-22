@@ -24,7 +24,7 @@ export function Sidebar({ items }: { items: NavItem[] }) {
         <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
           F
         </span>
-        <span className="truncate">{publicEnv.appName}</span>
+        <span className="truncate font-display">{publicEnv.appName}</span>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {items.map(({ key, href, icon }) => {
