@@ -87,5 +87,56 @@ export async function addAppointment(input: AppointmentInput): Promise<Result> {
 
   revalidatePath(`/jobs/${d.job_id}`);
   revalidatePath("/jobs");
+  revalidatePath("/schedule");
+  return { ok: true };
+}
+
+/** Reschedule an existing appointment (drag/edit on the dispatch board). */
+export async function rescheduleAppointment(input: {
+  appointment_id: string;
+  scheduled_start: string;
+  duration_minutes: number;
+  assigned_technician_id?: string | null;
+}): Promise<Result> {
+  const ctx = await requireSection("schedule");
+  if (!canWrite(ctx.role)) return { ok: false, error: WRITE_DENIED };
+
+  const start = new Date(input.scheduled_start);
+  if (Number.isNaN(start.getTime())) {
+    return { ok: false, error: "Invalid start time." };
+  }
+  const duration = Number(input.duration_minutes) || 60;
+  const end = new Date(start.getTime() + duration * 60000);
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("appointments")
+    .update({
+      scheduled_start: start.toISOString(),
+      scheduled_end: end.toISOString(),
+      assigned_technician_id: input.assigned_technician_id ?? null,
+      status: "rescheduled",
+    })
+    .eq("id", input.appointment_id)
+    .eq("company_id", ctx.company.id);
+
+  if (error) return { ok: false, error: "Could not reschedule." };
+  revalidatePath("/schedule");
+  return { ok: true };
+}
+
+export async function cancelAppointment(appointmentId: string): Promise<Result> {
+  const ctx = await requireSection("schedule");
+  if (!canWrite(ctx.role)) return { ok: false, error: WRITE_DENIED };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("appointments")
+    .update({ status: "cancelled" })
+    .eq("id", appointmentId)
+    .eq("company_id", ctx.company.id);
+
+  if (error) return { ok: false, error: "Could not cancel the appointment." };
+  revalidatePath("/schedule");
   return { ok: true };
 }
