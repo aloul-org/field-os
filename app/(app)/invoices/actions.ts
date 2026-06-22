@@ -10,6 +10,7 @@ import { computeTotals } from "@/lib/money";
 import { nextDocumentNumber } from "@/lib/documents";
 import { sendEmail } from "@/lib/messaging/email";
 import { lineItemInputSchema } from "@/lib/validations/estimate";
+import { recomputeJobProfitability } from "@/lib/finance/profitability";
 import { z } from "zod";
 import type { LineItem } from "@/lib/types/database";
 
@@ -270,14 +271,26 @@ export async function markInvoicePaid(id: string): Promise<Result> {
   if (!canWrite(ctx.role)) return { ok: false, error: WRITE_DENIED };
 
   const supabase = createClient();
-  const { error } = await supabase
+  const { data: invoice, error } = await supabase
     .from("invoices")
     .update({ status: "paid", paid_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("company_id", ctx.company.id);
+    .eq("company_id", ctx.company.id)
+    .select("job_id")
+    .single();
   if (error) return { ok: false, error: "Could not update the invoice." };
+
+  // Refresh the job's profitability snapshot now that revenue is realised.
+  if (invoice?.job_id) {
+    try {
+      await recomputeJobProfitability(supabase, ctx.company.id, invoice.job_id);
+    } catch {
+      // best-effort — never block marking paid on the analytics snapshot
+    }
+  }
 
   revalidatePath(`/invoices/${id}`);
   revalidatePath("/invoices");
+  revalidatePath("/finance");
   return { ok: true, data: undefined };
 }

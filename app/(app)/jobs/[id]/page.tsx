@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { JobStatusControl } from "@/components/jobs/JobStatusControl";
 import { AppointmentForm } from "@/components/jobs/AppointmentForm";
 import { JobInvoiceButton } from "@/components/jobs/JobInvoiceButton";
+import { JobUpsell } from "@/components/jobs/JobUpsell";
 import type { JobStatus } from "@/lib/types/database";
 
 const STATUS_VARIANT: Record<JobStatus, "secondary" | "default" | "success" | "warning" | "destructive"> = {
@@ -206,6 +207,17 @@ export default async function JobDetailPage({
               />
             </CardContent>
           </Card>
+
+          {writable && (job.status === "completed" || job.status === "invoiced") && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Follow up</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <JobUpsell jobId={job.id} />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

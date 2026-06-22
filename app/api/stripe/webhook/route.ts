@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 
 import { createAdminClient } from "@/lib/supabase/server";
+import { recomputeJobProfitability } from "@/lib/finance/profitability";
 import { getStripe } from "@/lib/stripe";
 import { serverEnv } from "@/lib/env";
 import type { SubscriptionPlan, SubscriptionStatus } from "@/lib/types/database";
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
           const fee = session.metadata?.platform_fee_minor
             ? Number(session.metadata.platform_fee_minor) / 100
             : null;
-          await admin
+          const { data: paidInvoice } = await admin
             .from("invoices")
             .update({
               status: "paid",
@@ -72,7 +73,22 @@ export async function POST(request: Request) {
                   : null,
               platform_fee_amount: fee,
             })
-            .eq("id", invoiceId);
+            .eq("id", invoiceId)
+            .select("company_id, job_id")
+            .single();
+
+          // Refresh the job profitability snapshot now revenue is realised.
+          if (paidInvoice?.job_id && paidInvoice.company_id) {
+            try {
+              await recomputeJobProfitability(
+                admin,
+                paidInvoice.company_id,
+                paidInvoice.job_id
+              );
+            } catch {
+              // best-effort — analytics must never fail the payment webhook
+            }
+          }
           break;
         }
 
