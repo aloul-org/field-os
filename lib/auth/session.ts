@@ -96,6 +96,16 @@ export async function requireContext(): Promise<ActiveContext> {
 }
 
 /**
+ * Require a technician session for the /tech PWA. Non-technicians are sent to the
+ * office app (they have no business in the field surface).
+ */
+export async function requireTechnician(): Promise<ActiveContext> {
+  const ctx = await requireContext();
+  if (ctx.role !== "technician") redirect("/dashboard");
+  return ctx;
+}
+
+/**
  * Require access to a section. Technicians are sent to their own app; other
  * roles without access render a friendly no-access page (handled by the caller
  * catching this redirect target).

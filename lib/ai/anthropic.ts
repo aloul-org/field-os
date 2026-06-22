@@ -81,6 +81,64 @@ export async function runJsonPrompt({
   return parseJsonObject(text);
 }
 
+interface TextPromptOptions {
+  model?: string;
+  system: string;
+  messages: { role: "user" | "assistant"; content: string }[];
+  images?: ImageInput[];
+  maxTokens?: number;
+}
+
+/**
+ * Run a prompt that returns free-form prose (job-report formatting, copilot
+ * chat). Multi-turn via `messages`; an optional image is attached to the final
+ * user turn for vision questions.
+ */
+export async function runTextPrompt({
+  model = MODELS.live,
+  system,
+  messages,
+  images,
+  maxTokens = 1024,
+}: TextPromptOptions): Promise<string> {
+  const anthropic = getAnthropic();
+
+  const apiMessages: Anthropic.MessageParam[] = messages.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  // Attach images to the last user message, if any.
+  if (images && images.length > 0 && apiMessages.length > 0) {
+    const last = apiMessages[apiMessages.length - 1];
+    if (last.role === "user") {
+      const blocks: Anthropic.ContentBlockParam[] = images.map((img) => ({
+        type: "image",
+        source: { type: "base64", media_type: img.mediaType, data: img.data },
+      }));
+      blocks.push({ type: "text", text: typeof last.content === "string" ? last.content : "" });
+      last.content = blocks;
+    }
+  }
+
+  const response = await anthropic.messages.create({
+    model,
+    max_tokens: maxTokens,
+    system,
+    messages: apiMessages,
+  });
+
+  if (response.stop_reason === "refusal") {
+    throw new Error("The AI declined to process this request.");
+  }
+
+  return response.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("")
+    .trim();
+}
+
 /**
  * Extract the first JSON object from a model response, tolerating markdown
  * code fences or a stray sentence around it.
