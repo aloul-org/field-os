@@ -53,3 +53,22 @@ export async function updateCompany(
   revalidatePath("/settings");
   return { ok: true };
 }
+
+/** Toggle the embeddable website lead-capture widget on/off. */
+export async function setWidgetEnabled(enabled: boolean): Promise<Result> {
+  const ctx = await requireSection("settings");
+  if (!canWrite(ctx.role)) {
+    return { ok: false, error: "You don't have permission to change settings." };
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("companies")
+    .update({ widget_enabled: enabled })
+    .eq("id", ctx.company.id);
+
+  if (error) return { ok: false, error: "Could not update the widget." };
+
+  revalidatePath("/settings/lead-capture");
+  return { ok: true };
+}
