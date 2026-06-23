@@ -7,6 +7,7 @@ import { Mic, Square, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { enqueue } from "@/lib/tech/outbox";
 
 /**
  * Records a spoken job report, sends it for Whisper transcription + AI
@@ -64,6 +65,11 @@ export function VoiceReportRecorder({
     fd.set("jobId", jobId);
     fd.set("audio", blob, "report.webm");
     try {
+      if (!navigator.onLine) {
+        await enqueue({ kind: "voice", jobId, blob, filename: "report.webm", createdAt: Date.now() });
+        toast({ description: "Saved — your report will upload when you're back online." });
+        return;
+      }
       const res = await fetch("/api/tech/voice-report", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok || !json.ok) {
@@ -75,8 +81,9 @@ export function VoiceReportRecorder({
       toast({ description: "Report saved." });
       router.refresh();
     } catch {
-      toast({ variant: "destructive", description: "Couldn't process the recording." });
-      setTypedMode(true);
+      // Network error → queue the audio for retry.
+      await enqueue({ kind: "voice", jobId, blob, filename: "report.webm", createdAt: Date.now() });
+      toast({ description: "Saved — your report will upload when you're back online." });
     } finally {
       setProcessing(false);
     }

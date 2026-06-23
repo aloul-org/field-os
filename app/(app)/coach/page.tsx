@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { Bot, Plus, MessageSquare } from "lucide-react";
 
+import { getTranslations } from "next-intl/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
+import { computeNudges } from "@/lib/insights/nudges";
 import { CoachChat } from "@/components/coach/CoachChat";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Coach" };
 
-const SUGGESTIONS = [
+// Fallback chips when nothing notable is detected in the data this week.
+const DEFAULT_SUGGESTIONS = [
   "Why did we lose estimates last month?",
   "Which technician is most profitable?",
   "How can I increase revenue?",
@@ -23,6 +27,7 @@ export default async function CoachPage({
 }) {
   const ctx = await requireSection("coach");
   const supabase = createClient();
+  const t = await getTranslations("coach");
 
   const { data: conversations } = await supabase
     .from("ai_coach_conversations")
@@ -31,6 +36,13 @@ export default async function CoachPage({
     .eq("user_id", ctx.user.id)
     .order("created_at", { ascending: false })
     .limit(50);
+
+  // Dynamic chips surface only genuinely notable issues; pad to 4 with defaults.
+  const nudges = await computeNudges(supabase, ctx.company.id);
+  const suggestions = [
+    ...nudges.map((n) => n.question),
+    ...DEFAULT_SUGGESTIONS,
+  ].slice(0, 4);
 
   const activeId = searchParams.c;
   let initialMessages: { role: "user" | "assistant"; content: string }[] = [];
@@ -58,7 +70,7 @@ export default async function CoachPage({
       <aside className="lg:col-span-1">
         <Button asChild variant="outline" className="mb-3 w-full">
           <Link href="/coach">
-            <Plus className="h-4 w-4" /> New chat
+            <Plus className="h-4 w-4" /> {t("newChat")}
           </Link>
         </Button>
         <nav className="space-y-1">
@@ -83,14 +95,14 @@ export default async function CoachPage({
       <div className="lg:col-span-3">
         <div className="mb-3 flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-xl font-bold tracking-tight">Business Coach</h1>
+          <h1 className="font-display text-xl font-bold tracking-tight">{t("title")}</h1>
         </div>
         <CoachChat
           key={activeId ?? "new"}
           mode="coach"
           conversationId={activeId}
           initialMessages={initialMessages}
-          suggestions={SUGGESTIONS}
+          suggestions={suggestions}
         />
       </div>
     </div>

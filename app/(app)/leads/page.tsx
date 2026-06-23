@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Inbox, Plus } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -28,6 +29,7 @@ export default async function LeadsPage({
   const ctx = await requireSection("leads");
   const supabase = createClient();
   const writable = canWrite(ctx.role);
+  const t = await getTranslations("leads");
 
   const activeTab =
     searchParams.status && VALID_TABS.has(searchParams.status as LeadStatus)
@@ -53,7 +55,7 @@ export default async function LeadsPage({
     <NewLeadDialog
       trigger={
         <Button>
-          <Plus className="h-4 w-4" /> Add lead
+          <Plus className="h-4 w-4" /> {t("addLead")}
         </Button>
       }
     />
@@ -62,8 +64,8 @@ export default async function LeadsPage({
   return (
     <div>
       <PageHeader
-        title="Leads"
-        description="Enquiries from calls, WhatsApp, your website and manual entry — scored automatically."
+        title={t("title")}
+        description={t("description")}
         action={newButton}
       />
 
@@ -91,8 +93,8 @@ export default async function LeadsPage({
       {!leads || leads.length === 0 ? (
         <EmptyState
           icon={Inbox}
-          title="No leads here yet"
-          description="Leads from calls, WhatsApp, and your website will show up here. You can also add one by hand."
+          title={t("emptyTitle")}
+          description={t("emptyBody")}
           action={newButton}
         />
       ) : (

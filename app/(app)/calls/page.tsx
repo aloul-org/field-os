@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Phone, PhoneMissed, PhoneForwarded, Voicemail } from "lucide-react";
 
+import { getTranslations } from "next-intl/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/format";
@@ -38,6 +40,7 @@ function formatDuration(seconds: number | null): string {
 export default async function CallsPage() {
   const ctx = await requireSection("calls");
   const supabase = createClient();
+  const t = await getTranslations("calls");
 
   const { data: calls } = await supabase
     .from("calls")
@@ -48,17 +51,10 @@ export default async function CallsPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Calls"
-        description="Calls handled by your AI receptionist — each one captured, summarised and turned into a lead."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
 
       {!calls || calls.length === 0 ? (
-        <EmptyState
-          icon={Phone}
-          title="No calls yet"
-          description="When your AI receptionist answers a call, it'll appear here with a summary and the caller's details."
-        />
+        <EmptyState icon={Phone} title={t("emptyTitle")} description={t("emptyBody")} />
       ) : (
         <Card className="divide-y">
           {calls.map((c) => {

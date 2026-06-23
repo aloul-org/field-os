@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Star, AlertTriangle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -18,6 +19,7 @@ export default async function ReviewsPage() {
   const supabase = createClient();
   const region = ctx.company.region;
   const writable = canWrite(ctx.role);
+  const t = await getTranslations("reviews");
 
   const [{ data: recentJobs }, { data: requests }, { data: customers }] =
     await Promise.all([
@@ -47,8 +49,8 @@ export default async function ReviewsPage() {
   return (
     <div>
       <PageHeader
-        title="Reviews"
-        description="Ask happy customers for a review, and catch unhappy ones before they post."
+        title={t("title")}
+        description={t("description")}
         action={writable ? <LogBadReviewDialog customers={customers ?? []} /> : null}
       />
 
@@ -68,7 +70,7 @@ export default async function ReviewsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Ask for a review</CardTitle>
+            <CardTitle className="text-base">{t("askForReview")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {!recentJobs || recentJobs.length === 0 ? (
@@ -99,7 +101,7 @@ export default async function ReviewsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">History</CardTitle>
+            <CardTitle className="text-base">{t("history")}</CardTitle>
           </CardHeader>
           <CardContent>
             {!requests || requests.length === 0 ? (

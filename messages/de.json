@@ -145,6 +145,70 @@
     "language": "Sprache",
     "savedToast": "Einstellungen gespeichert."
   },
+  "leads": {
+    "title": "Anfragen",
+    "description": "Anfragen aus Anrufen, WhatsApp, Ihrer Website und manueller Eingabe — automatisch bewertet.",
+    "addLead": "Anfrage hinzufügen",
+    "emptyTitle": "Noch keine Anfragen",
+    "emptyBody": "Anfragen aus Anrufen, WhatsApp und Ihrer Website erscheinen hier. Sie können auch manuell eine hinzufügen."
+  },
+  "calls": {
+    "title": "Anrufe",
+    "description": "Anrufe, die Ihr KI-Telefonassistent entgegengenommen hat — jeder erfasst, zusammengefasst und in eine Anfrage umgewandelt.",
+    "emptyTitle": "Noch keine Anrufe",
+    "emptyBody": "Wenn Ihr KI-Telefonassistent einen Anruf entgegennimmt, erscheint er hier mit Zusammenfassung und Anruferdaten."
+  },
+  "schedule": {
+    "title": "Einsatzplan",
+    "description": "Der Tag Ihres Teams auf einen Blick. Weisen Sie ungeplante Aufträge einem Techniker und Zeitfenster zu.",
+    "unscheduled": "Ungeplant",
+    "optimiseRoute": "Route optimieren",
+    "today": "Heute",
+    "noJobs": "Keine Aufträge.",
+    "nothingWaiting": "Nichts wartet auf Planung. 🎉"
+  },
+  "materials": {
+    "title": "Material",
+    "description": "Behalten Sie den Bestand im Blick und erstellen Sie Nachbestellungen, wenn etwas zur Neige geht.",
+    "addMaterial": "Material hinzufügen",
+    "emptyTitle": "Noch kein Material",
+    "emptyBody": "Fügen Sie das am häufigsten genutzte Material hinzu, damit FieldOS den Bestand verfolgen und rechtzeitig nachbestellen kann.",
+    "lowStock": "{count} Artikel auf oder unter der Nachbestellgrenze."
+  },
+  "finance": {
+    "title": "Finanzen",
+    "description": "Gewinn nach Auftrag, Techniker, Leistung und Kunde — aus bezahlten Rechnungen.",
+    "askCfo": "KI-Finanzchef fragen",
+    "emptyTitle": "Noch keine Gewinndaten",
+    "emptyBody": "Sobald Sie eine Rechnung als bezahlt markieren, berechnet FieldOS den Gewinn des Auftrags, und er erscheint hier.",
+    "revenuePaid": "Umsatz (bezahlt)",
+    "profit": "Gewinn",
+    "avgMargin": "Ø Marge",
+    "byJob": "Nach Auftrag",
+    "byTechnician": "Nach Techniker",
+    "byService": "Nach Leistung",
+    "byCustomer": "Nach Kunde",
+    "overheadNote": "Gemeinkosten werden gleichmäßig auf die Aufträge dieses Monats verteilt — für genaue Zahlen wenden Sie sich an Ihren Steuerberater."
+  },
+  "coach": {
+    "title": "Business-Coach",
+    "newChat": "Neuer Chat",
+    "placeholder": "Fragen Sie Ihren Coach…"
+  },
+  "reviews": {
+    "title": "Bewertungen",
+    "description": "Bitten Sie zufriedene Kunden um eine Bewertung und fangen Sie unzufriedene ab, bevor sie posten.",
+    "logBadReview": "Schlechte Bewertung erfassen",
+    "askForReview": "Um Bewertung bitten",
+    "history": "Verlauf"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Laden Sie Personen ein, legen Sie deren Zugriff fest und verwalten Sie, wer aktiv ist.",
+    "inviteMember": "Mitglied einladen",
+    "emptyTitle": "Bisher nur Sie",
+    "emptyBody": "Laden Sie Techniker, Disponenten und Büropersonal ein, um gemeinsam in FieldOS zu arbeiten."
+  },
   "errors": {
     "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "notFound": "Nicht gefunden.",

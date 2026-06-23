@@ -1,4 +1,5 @@
 import { UsersRound } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -13,6 +14,7 @@ export default async function TeamPage() {
   const ctx = await requireSection("team");
   const supabase = createClient();
   const canManage = ctx.role === "owner" || ctx.role === "admin";
+  const t = await getTranslations("team");
 
   const { data: members } = await supabase
     .from("team_members")
@@ -32,16 +34,16 @@ export default async function TeamPage() {
   return (
     <div>
       <PageHeader
-        title="Team"
-        description="Invite people, set what they can access, and manage who's active."
+        title={t("title")}
+        description={t("description")}
         action={canManage ? <InviteMemberDialog /> : null}
       />
 
       {rows.length === 0 ? (
         <EmptyState
           icon={UsersRound}
-          title="Just you so far"
-          description="Invite technicians, dispatchers and office staff to work together in FieldOS."
+          title={t("emptyTitle")}
+          description={t("emptyBody")}
           action={canManage ? <InviteMemberDialog /> : null}
         />
       ) : (

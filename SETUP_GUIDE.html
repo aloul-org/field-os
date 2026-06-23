@@ -141,7 +141,7 @@
   <!-- 4 -->
   <section id="migrations">
     <h2><span class="step">4</span>Apply the database schema</h2>
-    <p>The schema lives in <code>supabase/migrations/</code> as numbered files (<code>0001</code>–<code>0014</code>). They <strong>must run in order</strong> — the helper functions in <code>0001</code> are used by every table's security policy. This also creates the Storage buckets automatically.</p>
+    <p>The schema lives in <code>supabase/migrations/</code> as numbered files (<code>0001</code>–<code>0015</code>). They <strong>must run in order</strong> — the helper functions in <code>0001</code> are used by every table's security policy. This also creates the Storage buckets automatically. The final file, <code>0015_realtime.sql</code>, adds the dispatch-board tables to the Realtime publication so the live schedule updates without polling.</p>
 
     <h3>Option A — Supabase CLI (recommended)</h3>
 <pre><code># Install the CLI once (https://supabase.com/docs/guides/cli)
@@ -157,7 +157,7 @@ supabase db push</code></pre>
     <ol>
       <li>In the dashboard open <strong>SQL Editor → New query</strong>.</li>
       <li>Open each file in <code>supabase/migrations/</code> in ascending order (<code>0001_helpers.sql</code> first), paste its contents, and click <strong>Run</strong>.</li>
-      <li>Repeat through <code>0014_storage.sql</code>.</li>
+      <li>Repeat through <code>0015_realtime.sql</code>.</li>
     </ol>
 
     <div class="note ok">
@@ -203,15 +203,26 @@ Copy-Item .env.example .env.local</code></pre>
         <tr><td><code>STRIPE_SECRET_KEY</code> + price IDs</td><td><span class="pill later">Phase 2</span></td><td>Stripe dashboard → Developers</td></tr>
         <tr><td><code>TWILIO_*</code></td><td><span class="pill later">Phase 3</span></td><td>Twilio console (Voice/SMS/WhatsApp)</td></tr>
         <tr><td><code>RESEND_API_KEY</code></td><td><span class="pill later">Phase 2</span></td><td><a href="https://resend.com" target="_blank" rel="noopener">resend.com</a></td></tr>
-        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>Google Cloud → Maps Platform</td></tr>
+        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>Google Cloud → Maps Platform (Distance Matrix + Routes APIs — auto-scheduler travel times &amp; route optimisation)</td></tr>
         <tr><td><code>NEXT_PUBLIC_MAPBOX_TOKEN</code></td><td><span class="pill later">Phase 4</span></td><td><a href="https://mapbox.com" target="_blank" rel="noopener">mapbox.com</a> (map rendering)</td></tr>
       </tbody>
     </table>
 
     <div class="note info">
       <strong>Good to know</strong>
-      <code>lib/env.ts</code> reads server secrets lazily and throws a clear error only when a still-unconfigured feature is actually used — so a missing Stripe key won't break Phase&nbsp;1 pages.
+      <code>lib/env.ts</code> reads server secrets lazily and throws a clear error only when a still-unconfigured feature is actually used — so a missing Stripe key won't break Phase&nbsp;1 pages. Integration-backed features (Twilio voice/SMS/WhatsApp, OpenAI Whisper voice reports, Google Maps routing, Resend email) all <strong>degrade gracefully</strong>: without the key the feature shows a friendly "not available" message or falls back (e.g. typing a report instead of recording), rather than crashing.
     </div>
+  </section>
+
+  <!-- 6b -->
+  <section id="pwa">
+    <h2><span class="step">6b</span>Technician PWA <span class="pill">automatic</span></h2>
+    <p>The technician app at <code>/tech/*</code> is an installable Progressive Web App (built with <code>next-pwa</code>). No extra configuration is needed:</p>
+    <ul class="check">
+      <li>The service worker (<code>public/sw.js</code>) is generated automatically by <code>npm run build</code> and is <strong>disabled in <code>npm run dev</code></strong> so it doesn't interfere with hot reload — test offline behaviour against a production build (<code>npm run build &amp;&amp; npm run start</code>).</li>
+      <li>Technicians install it via their browser's <strong>"Add to Home Screen"</strong>; the manifest lives at <code>public/manifest.json</code>.</li>
+      <li>Today's jobs stay viewable offline, and photo/voice uploads queue locally (IndexedDB) and retry automatically when the signal returns.</li>
+    </ul>
   </section>
 
   <!-- 7 -->
@@ -300,7 +311,8 @@ Copy-Item .env.example .env.local</code></pre>
     </table>
     <div class="note info">
       <strong>Cron jobs</strong>
-      Scheduled tasks (daily digests, overdue checks, renewals, queue processing) run as Vercel Cron routes guarded by <code>CRON_SECRET</code>. A <code>vercel.json</code> with the cron schedule is added when those routes ship.
+      Scheduled tasks run as routes guarded by <code>CRON_SECRET</code> (sent as <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code>). The renewal-reminder cron ships at <code>POST /api/cron/renewals</code> — schedule it daily with a <code>vercel.json</code> cron entry or any external scheduler. Example <code>vercel.json</code>:
+      <pre><code>{ "crons": [ { "path": "/api/cron/renewals", "schedule": "0 8 * * *" } ] }</code></pre>
     </div>
   </section>
 
@@ -316,6 +328,15 @@ Copy-Item .env.example .env.local</code></pre>
 
     <h3>Redirected to login in a loop after signing in</h3>
     <p>Check the Supabase <strong>Site URL</strong> and <strong>Redirect URLs</strong> (step&nbsp;10) match your actual domain, and that <code>NEXT_PUBLIC_APP_URL</code> is correct.</p>
+
+    <h3>The live schedule doesn't update in real time</h3>
+    <p>Confirm <code>0015_realtime.sql</code> was applied — it adds <code>appointments</code>, <code>jobs</code> and <code>team_members</code> to the Supabase Realtime publication. Without it the dispatch board still works but won't auto-refresh.</p>
+
+    <h3><code>npm run build</code> runs out of memory locally</h3>
+    <p>On lower-memory machines, give Node a bigger heap: <code>NODE_OPTIONS="--max-old-space-size=6144" npm run build</code>. Vercel's build environment has enough memory by default.</p>
+
+    <h3>Offline uploads in the technician app aren't testing as expected in dev</h3>
+    <p>The service worker is disabled in <code>npm run dev</code>. Test PWA/offline behaviour against a production build: <code>npm run build &amp;&amp; npm run start</code>.</p>
 
     <h3><code>npm run seed</code> exits with "Set NEXT_PUBLIC_SUPABASE_URL…"</h3>
     <p>Your <code>.env.local</code> still has the placeholder URL. Paste the real Supabase values first.</p>

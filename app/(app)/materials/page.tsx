@@ -1,4 +1,5 @@
 import { Package, Plus, AlertTriangle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -20,6 +21,7 @@ export default async function MaterialsPage() {
   const supabase = createClient();
   const region = ctx.company.region;
   const writable = canWrite(ctx.role);
+  const t = await getTranslations("materials");
 
   const [{ data: materials }, { data: suppliers }] = await Promise.all([
     supabase
@@ -43,7 +45,7 @@ export default async function MaterialsPage() {
       suppliers={supplierList}
       trigger={
         <Button>
-          <Plus className="h-4 w-4" /> Add material
+          <Plus className="h-4 w-4" /> {t("addMaterial")}
         </Button>
       }
     />
@@ -52,26 +54,23 @@ export default async function MaterialsPage() {
   return (
     <div>
       <PageHeader
-        title="Materials"
-        description="Track stock and draft restock requests when something runs low."
+        title={t("title")}
+        description={t("description")}
         action={addButton}
       />
 
       {lowStock.length > 0 && (
         <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
           <AlertTriangle className="h-4 w-4 text-destructive" />
-          <span>
-            {lowStock.length} item{lowStock.length > 1 ? "s" : ""} at or below the reorder
-            threshold.
-          </span>
+          <span>{t("lowStock", { count: lowStock.length })}</span>
         </div>
       )}
 
       {list.length === 0 ? (
         <EmptyState
           icon={Package}
-          title="No materials yet"
-          description="Add the materials you use most so FieldOS can track stock and help you reorder before you run out."
+          title={t("emptyTitle")}
+          description={t("emptyBody")}
           action={addButton}
         />
       ) : (

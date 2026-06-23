@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TrendingUp, Bot } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -7,6 +8,7 @@ import { formatCurrency } from "@/lib/format";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatCard } from "@/components/shared/StatCard";
+import { RevenueForecast } from "@/components/finance/RevenueForecast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,11 +16,11 @@ import { cn } from "@/lib/utils";
 export const metadata = { title: "Finance" };
 
 type Tab = "job" | "technician" | "service" | "customer";
-const TABS: { key: Tab; label: string }[] = [
-  { key: "job", label: "By job" },
-  { key: "technician", label: "By technician" },
-  { key: "service", label: "By service" },
-  { key: "customer", label: "By customer" },
+const TABS: { key: Tab; labelKey: "byJob" | "byTechnician" | "byService" | "byCustomer" }[] = [
+  { key: "job", labelKey: "byJob" },
+  { key: "technician", labelKey: "byTechnician" },
+  { key: "service", labelKey: "byService" },
+  { key: "customer", labelKey: "byCustomer" },
 ];
 
 interface Row {
@@ -37,7 +39,8 @@ export default async function FinancePage({
   const ctx = await requireSection("finance");
   const supabase = createClient();
   const region = ctx.company.region;
-  const tab: Tab = TABS.some((t) => t.key === searchParams.tab)
+  const t = await getTranslations("finance");
+  const tab: Tab = TABS.some((tabDef) => tabDef.key === searchParams.tab)
     ? (searchParams.tab as Tab)
     : "job";
 
@@ -99,44 +102,44 @@ export default async function FinancePage({
   return (
     <div>
       <PageHeader
-        title="Finance"
-        description="Profit by job, technician, service and customer — from paid invoices."
+        title={t("title")}
+        description={t("description")}
         action={
           <Button asChild variant="outline">
             <Link href="/finance/ai-cfo">
-              <Bot className="h-4 w-4" /> Ask the AI CFO
+              <Bot className="h-4 w-4" /> {t("askCfo")}
             </Link>
           </Button>
         }
       />
 
       {rows.length === 0 ? (
-        <EmptyState
-          icon={TrendingUp}
-          title="No profit data yet"
-          description="Once you mark an invoice paid, FieldOS works out the job's profit and it'll show up here."
-        />
+        <EmptyState icon={TrendingUp} title={t("emptyTitle")} description={t("emptyBody")} />
       ) : (
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
-            <StatCard label="Revenue (paid)" value={formatCurrency(totalRevenue, region)} />
-            <StatCard label="Profit" value={formatCurrency(totalProfit, region)} tone="success" />
-            <StatCard label="Avg margin" value={`${avgMargin.toFixed(0)}%`} />
+            <StatCard label={t("revenuePaid")} value={formatCurrency(totalRevenue, region)} />
+            <StatCard label={t("profit")} value={formatCurrency(totalProfit, region)} tone="success" />
+            <StatCard label={t("avgMargin")} value={`${avgMargin.toFixed(0)}%`} />
+          </div>
+
+          <div className="mb-6">
+            <RevenueForecast region={region} />
           </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
-            {TABS.map((t) => (
+            {TABS.map((tabDef) => (
               <Link
-                key={t.key}
-                href={`/finance?tab=${t.key}`}
+                key={tabDef.key}
+                href={`/finance?tab=${tabDef.key}`}
                 className={cn(
                   "rounded-pill px-3 py-1.5 text-sm font-medium transition-colors",
-                  tab === t.key
+                  tab === tabDef.key
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
               >
-                {t.label}
+                {t(tabDef.labelKey)}
               </Link>
             ))}
           </div>
@@ -144,7 +147,7 @@ export default async function FinancePage({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Profitability {TABS.find((t) => t.key === tab)?.label.toLowerCase()}
+                {t(TABS.find((tabDef) => tabDef.key === tab)?.labelKey ?? "byJob")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -181,10 +184,7 @@ export default async function FinancePage({
               })}
             </CardContent>
           </Card>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Overhead is allocated evenly across jobs this month — for exact figures, consult your
-            accountant.
-          </p>
+          <p className="mt-3 text-xs text-muted-foreground">{t("overheadNote")}</p>
         </>
       )}
     </div>

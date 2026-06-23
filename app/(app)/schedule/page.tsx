@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, Clock, MapPin, User } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -10,6 +11,7 @@ import { ScheduleDayNav } from "@/components/schedule/ScheduleDayNav";
 import { ScheduleJobDialog } from "@/components/schedule/ScheduleJobDialog";
 import { ScheduleRealtime } from "@/components/schedule/ScheduleRealtime";
 import { OptimizeRouteButton } from "@/components/schedule/OptimizeRouteButton";
+import { EmergencyFitButton } from "@/components/schedule/EmergencyFitButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -38,6 +40,7 @@ export default async function SchedulePage({
   const supabase = createClient();
   const region = ctx.company.region;
   const writable = canWrite(ctx.role);
+  const t = await getTranslations("schedule");
 
   const date =
     searchParams.date && DATE_RE.test(searchParams.date)
@@ -67,7 +70,7 @@ export default async function SchedulePage({
         .order("scheduled_start"),
       supabase
         .from("jobs")
-        .select("id, title, trade_category, estimated_duration_minutes")
+        .select("id, title, trade_category, estimated_duration_minutes, priority")
         .eq("company_id", ctx.company.id)
         .eq("status", "unscheduled")
         .order("created_at", { ascending: false })
@@ -108,8 +111,8 @@ export default async function SchedulePage({
   return (
     <div>
       <PageHeader
-        title="Schedule"
-        description="Your team's day at a glance. Assign unscheduled jobs to a technician and time slot."
+        title={t("title")}
+        description={t("description")}
         action={
           <div className="flex items-center gap-3">
             <ScheduleRealtime companyId={ctx.company.id} />
@@ -145,7 +148,7 @@ export default async function SchedulePage({
                 </CardHeader>
                 <CardContent>
                   {laneAppts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No jobs.</p>
+                    <p className="text-sm text-muted-foreground">{t("noJobs")}</p>
                   ) : (
                     <div className="flex flex-wrap items-stretch gap-2">
                       {laneAppts.map((a, idx) => (
@@ -190,14 +193,12 @@ export default async function SchedulePage({
             <CardHeader className="py-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                Unscheduled ({unscheduled?.length ?? 0})
+                {t("unscheduled")} ({unscheduled?.length ?? 0})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {!unscheduled || unscheduled.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Nothing waiting to be scheduled. 🎉
-                </p>
+                <p className="text-sm text-muted-foreground">{t("nothingWaiting")}</p>
               ) : (
                 unscheduled.map((job) => (
                   <div
@@ -215,15 +216,23 @@ export default async function SchedulePage({
                       <Badge variant="secondary" className="capitalize">
                         {job.trade_category}
                       </Badge>
+                      {job.priority === "emergency" && (
+                        <Badge variant="destructive">Emergency</Badge>
+                      )}
                     </p>
                     {writable && (
-                      <ScheduleJobDialog
-                        jobId={job.id}
-                        jobTitle={job.title}
-                        technicians={techs}
-                        defaultDate={date}
-                        defaultDurationMinutes={job.estimated_duration_minutes ?? 60}
-                      />
+                      <div className="flex flex-wrap gap-2">
+                        <ScheduleJobDialog
+                          jobId={job.id}
+                          jobTitle={job.title}
+                          technicians={techs}
+                          defaultDate={date}
+                          defaultDurationMinutes={job.estimated_duration_minutes ?? 60}
+                        />
+                        {job.priority === "emergency" && (
+                          <EmergencyFitButton jobId={job.id} />
+                        )}
+                      </div>
                     )}
                   </div>
                 ))

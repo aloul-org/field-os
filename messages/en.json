@@ -145,6 +145,70 @@
     "language": "Language",
     "savedToast": "Settings saved."
   },
+  "leads": {
+    "title": "Leads",
+    "description": "Enquiries from calls, WhatsApp, your website and manual entry — scored automatically.",
+    "addLead": "Add lead",
+    "emptyTitle": "No leads here yet",
+    "emptyBody": "Leads from calls, WhatsApp, and your website will show up here. You can also add one by hand."
+  },
+  "calls": {
+    "title": "Calls",
+    "description": "Calls handled by your AI receptionist — each one captured, summarised and turned into a lead.",
+    "emptyTitle": "No calls yet",
+    "emptyBody": "When your AI receptionist answers a call, it'll appear here with a summary and the caller's details."
+  },
+  "schedule": {
+    "title": "Schedule",
+    "description": "Your team's day at a glance. Assign unscheduled jobs to a technician and time slot.",
+    "unscheduled": "Unscheduled",
+    "optimiseRoute": "Optimise route",
+    "today": "Today",
+    "noJobs": "No jobs.",
+    "nothingWaiting": "Nothing waiting to be scheduled. 🎉"
+  },
+  "materials": {
+    "title": "Materials",
+    "description": "Track stock and draft restock requests when something runs low.",
+    "addMaterial": "Add material",
+    "emptyTitle": "No materials yet",
+    "emptyBody": "Add the materials you use most so FieldOS can track stock and help you reorder before you run out.",
+    "lowStock": "{count} item(s) at or below the reorder threshold."
+  },
+  "finance": {
+    "title": "Finance",
+    "description": "Profit by job, technician, service and customer — from paid invoices.",
+    "askCfo": "Ask the AI CFO",
+    "emptyTitle": "No profit data yet",
+    "emptyBody": "Once you mark an invoice paid, FieldOS works out the job's profit and it'll show up here.",
+    "revenuePaid": "Revenue (paid)",
+    "profit": "Profit",
+    "avgMargin": "Avg margin",
+    "byJob": "By job",
+    "byTechnician": "By technician",
+    "byService": "By service",
+    "byCustomer": "By customer",
+    "overheadNote": "Overhead is allocated evenly across jobs this month — for exact figures, consult your accountant."
+  },
+  "coach": {
+    "title": "Business Coach",
+    "newChat": "New chat",
+    "placeholder": "Ask your coach…"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "description": "Ask happy customers for a review, and catch unhappy ones before they post.",
+    "logBadReview": "Log a bad review",
+    "askForReview": "Ask for a review",
+    "history": "History"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Invite people, set what they can access, and manage who's active.",
+    "inviteMember": "Invite member",
+    "emptyTitle": "Just you so far",
+    "emptyBody": "Invite technicians, dispatchers and office staff to work together in FieldOS."
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "notFound": "Not found.",

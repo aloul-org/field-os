@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { enqueue } from "@/lib/tech/outbox";
 
 type PhotoType = "before" | "progress" | "after" | "issue";
 
@@ -24,6 +25,18 @@ export function TechPhotoUpload({ jobId }: { jobId: string }) {
   const [type, setType] = useState<PhotoType>("progress");
   const [uploading, setUploading] = useState(false);
 
+  async function queueOffline(file: File) {
+    await enqueue({
+      kind: "photo",
+      jobId,
+      photoType: type,
+      blob: file,
+      filename: file.name || "photo.jpg",
+      createdAt: Date.now(),
+    });
+    toast({ description: "Saved — it'll upload when you're back online." });
+  }
+
   async function onFile(file: File) {
     setUploading(true);
     const fd = new FormData();
@@ -31,6 +44,10 @@ export function TechPhotoUpload({ jobId }: { jobId: string }) {
     fd.set("photoType", type);
     fd.set("file", file);
     try {
+      if (!navigator.onLine) {
+        await queueOffline(file);
+        return;
+      }
       const res = await fetch("/api/tech/photo", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok || !json.ok) {
@@ -40,10 +57,8 @@ export function TechPhotoUpload({ jobId }: { jobId: string }) {
       toast({ description: "Photo added." });
       router.refresh();
     } catch {
-      toast({
-        variant: "destructive",
-        description: "Couldn't upload — check your signal and try again.",
-      });
+      // Network error → queue for retry rather than losing the photo.
+      await queueOffline(file);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
