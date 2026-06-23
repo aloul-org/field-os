@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -36,6 +36,17 @@ export const metadata: Metadata = {
   },
   description:
     "FieldOS AI is an AI operating system for field service companies — it answers the phone, books the job, schedules the technician, writes the estimate and chases the invoice.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "FieldOS",
+  },
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FF5A1F",
 };
 
 export default async function RootLayout({

@@ -1,5 +1,6 @@
 import { requireTechnician } from "@/lib/auth/session";
 import { TechBottomNav } from "@/components/tech/TechBottomNav";
+import { OfflineBanner } from "@/components/tech/OfflineBanner";
 
 export const metadata = { title: "FieldOS — Field" };
 
@@ -18,6 +19,7 @@ export default async function TechLayout({
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
+      <OfflineBanner />
       <main className="mx-auto w-full max-w-xl px-4 pb-28 pt-6 text-[1.05rem]">
         {children}
       </main>

@@ -8,6 +8,8 @@ import { formatTime } from "@/lib/format";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ScheduleDayNav } from "@/components/schedule/ScheduleDayNav";
 import { ScheduleJobDialog } from "@/components/schedule/ScheduleJobDialog";
+import { ScheduleRealtime } from "@/components/schedule/ScheduleRealtime";
+import { OptimizeRouteButton } from "@/components/schedule/OptimizeRouteButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,6 +23,8 @@ interface ApptView {
   scheduled_end: string;
   status: string;
   assigned_technician_id: string | null;
+  route_order: number | null;
+  travel_minutes: number | null;
   job: { id: string; title: string; trade_category: string } | null;
   customer: { name: string } | null;
 }
@@ -54,7 +58,7 @@ export default async function SchedulePage({
       supabase
         .from("appointments")
         .select(
-          "id, scheduled_start, scheduled_end, status, assigned_technician_id, jobs(id, title, trade_category, customers(name))"
+          "id, scheduled_start, scheduled_end, status, assigned_technician_id, route_order, travel_time_minutes_from_previous, jobs(id, title, trade_category, customers(name))"
         )
         .eq("company_id", ctx.company.id)
         .gte("scheduled_start", dayStart)
@@ -80,6 +84,8 @@ export default async function SchedulePage({
       scheduled_end: a.scheduled_end,
       status: a.status,
       assigned_technician_id: a.assigned_technician_id,
+      route_order: a.route_order,
+      travel_minutes: a.travel_time_minutes_from_previous,
       job: job ? { id: job.id, title: job.title, trade_category: job.trade_category } : null,
       customer: job?.customers ?? null,
     };
@@ -104,49 +110,72 @@ export default async function SchedulePage({
       <PageHeader
         title="Schedule"
         description="Your team's day at a glance. Assign unscheduled jobs to a technician and time slot."
-        action={<ScheduleDayNav date={date} />}
+        action={
+          <div className="flex items-center gap-3">
+            <ScheduleRealtime companyId={ctx.company.id} />
+            <ScheduleDayNav date={date} />
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-4">
         <div className="space-y-4 lg:col-span-3">
           {lanes.map((lane) => {
-            const laneAppts = byLane.get(lane.id) ?? [];
+            const laneAppts = (byLane.get(lane.id) ?? []).slice().sort((a, b) => {
+              // Optimised route order takes precedence over start time when set.
+              if (a.route_order != null && b.route_order != null) return a.route_order - b.route_order;
+              if (a.route_order != null) return -1;
+              if (b.route_order != null) return 1;
+              return a.scheduled_start.localeCompare(b.scheduled_start);
+            });
+            const isTech = lane.id !== "__unassigned__";
             return (
               <Card key={lane.id}>
                 <CardHeader className="py-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    {lane.name}
-                    <span className="text-muted-foreground">
-                      ({laneAppts.length})
+                  <CardTitle className="flex items-center justify-between gap-2 text-sm">
+                    <span className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      {lane.name}
+                      <span className="text-muted-foreground">({laneAppts.length})</span>
                     </span>
+                    {writable && isTech && laneAppts.length >= 3 && (
+                      <OptimizeRouteButton technicianId={lane.id} date={date} />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {laneAppts.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No jobs.</p>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {laneAppts.map((a) => (
-                        <Link
-                          key={a.id}
-                          href={a.job ? `/jobs/${a.job.id}` : "#"}
-                          className="group rounded-md border bg-card p-3 text-sm transition-colors hover:bg-muted/50"
-                        >
-                          <p className="flex items-center gap-1.5 font-medium">
-                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                            {formatTime(a.scheduled_start, region)}–
-                            {formatTime(a.scheduled_end, region)}
-                          </p>
-                          <p className="mt-1 max-w-[200px] truncate">
-                            {a.job?.title ?? "Job"}
-                          </p>
-                          {a.customer && (
-                            <p className="max-w-[200px] truncate text-xs text-muted-foreground">
-                              {a.customer.name}
-                            </p>
+                    <div className="flex flex-wrap items-stretch gap-2">
+                      {laneAppts.map((a, idx) => (
+                        <div key={a.id} className="flex items-center gap-2">
+                          {idx > 0 && a.travel_minutes != null && (
+                            <span className="whitespace-nowrap text-xs text-muted-foreground">
+                              🚗 {a.travel_minutes}m
+                            </span>
                           )}
-                        </Link>
+                          <Link
+                            href={a.job ? `/jobs/${a.job.id}` : "#"}
+                            className="group rounded-md border bg-card p-3 text-sm transition-colors hover:bg-muted/50"
+                          >
+                            <p className="flex items-center gap-1.5 font-medium">
+                              {a.route_order != null && (
+                                <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                                  {a.route_order}
+                                </span>
+                              )}
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              {formatTime(a.scheduled_start, region)}–{formatTime(a.scheduled_end, region)}
+                            </p>
+                            <p className="mt-1 max-w-[200px] truncate">{a.job?.title ?? "Job"}</p>
+                            {a.customer && (
+                              <p className="max-w-[200px] truncate text-xs text-muted-foreground">
+                                {a.customer.name}
+                              </p>
+                            )}
+                          </Link>
+                        </div>
                       ))}
                     </div>
                   )}

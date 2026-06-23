@@ -7,6 +7,7 @@ import { formatTime } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TechStatusButton } from "@/components/tech/TechStatusButton";
+import { LocationSharing } from "@/components/tech/LocationSharing";
 import type { JobStatus } from "@/lib/types/database";
 
 export const metadata = { title: "Today" };
@@ -82,6 +83,8 @@ export default async function TechTodayPage() {
           })}
         </p>
       </header>
+
+      <LocationSharing />
 
       {jobs.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 p-10 text-center">

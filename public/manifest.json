@@ -1,0 +1,19 @@
+{
+  "name": "FieldOS AI",
+  "short_name": "FieldOS",
+  "description": "Your jobs, today — schedule, photos, reports and sign-off in the field.",
+  "start_url": "/tech/today",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15181B",
+  "theme_color": "#FF5A1F",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
