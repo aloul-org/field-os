@@ -3,13 +3,6 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 
-const ICON_TONE_CLASS = {
-  default: "text-muted-foreground",
-  success: "text-success",
-  warning: "text-warning",
-  destructive: "text-destructive",
-};
-
 const ICON_WRAP_TONE_CLASS = {
   default: "bg-muted text-muted-foreground",
   success: "bg-success/10 text-success",
@@ -17,7 +10,17 @@ const ICON_WRAP_TONE_CLASS = {
   destructive: "bg-destructive/10 text-destructive",
 };
 
+const HERO_WASH_TONE_CLASS = {
+  default: "from-primary/5",
+  success: "from-success/10",
+  warning: "from-warning/10",
+  destructive: "from-destructive/10",
+};
+
 type Tone = "default" | "success" | "warning" | "destructive";
+
+const HOVER_LIFT =
+  "transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-card-hover";
 
 export function StatCard({
   label,
@@ -37,8 +40,15 @@ export function StatCard({
 }) {
   if (size === "hero") {
     return (
-      <Card className={cn("flex flex-col justify-between", className)}>
-        <CardContent className="flex h-full flex-col justify-between gap-4 p-6">
+      <Card
+        className={cn(
+          "flex flex-col justify-between overflow-hidden bg-gradient-to-br to-transparent",
+          HERO_WASH_TONE_CLASS[tone],
+          HOVER_LIFT,
+          className
+        )}
+      >
+        <CardContent className="flex h-full flex-col justify-between gap-5 p-6">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {label}
@@ -46,30 +56,41 @@ export function StatCard({
             {Icon && (
               <span
                 className={cn(
-                  "grid h-9 w-9 shrink-0 place-items-center rounded-full",
+                  "grid h-11 w-11 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-black/5",
                   ICON_WRAP_TONE_CLASS[tone]
                 )}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
             )}
           </div>
-          <p className="font-display text-4xl font-bold tracking-tight">{value}</p>
+          <p className="font-display text-4xl font-bold tracking-tight tabular-nums">
+            {value}
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className={className}>
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <Card className={cn(HOVER_LIFT, className)}>
+      <CardContent className="flex items-center gap-4 p-4">
+        {Icon && (
+          <span
+            className={cn(
+              "grid h-10 w-10 shrink-0 place-items-center rounded-full",
+              ICON_WRAP_TONE_CLASS[tone]
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+        )}
+        <div className="min-w-0 space-y-1">
+          <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {label}
           </p>
-          <p className="font-display text-2xl font-bold">{value}</p>
+          <p className="font-display text-2xl font-bold tabular-nums">{value}</p>
         </div>
-        {Icon && <Icon className={cn("h-5 w-5", ICON_TONE_CLASS[tone])} aria-hidden="true" />}
       </CardContent>
     </Card>
   );

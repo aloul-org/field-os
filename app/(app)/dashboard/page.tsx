@@ -9,12 +9,15 @@ import {
   AlertTriangle,
   Siren,
   ArrowRight,
+  PartyPopper,
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { formatCurrency } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/shared/StatCard";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -108,37 +111,52 @@ export default async function DashboardPage() {
       key: `lead-${l.id}`,
       icon: Flame,
       tone: "destructive" as const,
-      label: `Hot lead: ${l.contact_name ?? "New enquiry"}`,
+      label: "Hot lead",
+      code: null as string | null,
+      detail: l.contact_name ?? "New enquiry",
       href: `/leads/${l.id}`,
     })),
     ...(emergencyJobs.data ?? []).map((j) => ({
       key: `job-${j.id}`,
       icon: Siren,
       tone: "destructive" as const,
-      label: `Emergency job unscheduled: ${j.title}`,
+      label: "Emergency — unscheduled",
+      code: j.job_number as string | null,
+      detail: j.title,
       href: `/jobs/${j.id}`,
     })),
     ...(overdueInvoices.data ?? []).map((i) => ({
       key: `inv-${i.id}`,
       icon: AlertTriangle,
       tone: "warning" as const,
-      label: `Overdue invoice ${i.invoice_number} — ${formatCurrency(Number(i.total_inc_vat), region)}`,
+      label: "Overdue invoice",
+      code: i.invoice_number as string | null,
+      detail: formatCurrency(Number(i.total_inc_vat), region),
       href: `/invoices/${i.id}`,
     })),
   ];
 
+  const today = now.toLocaleDateString(region === "DE" ? "de-DE" : "en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">
-          {t(greetingKey())}, {ctx.member.name.split(" ")[0]}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {ctx.company.business_name}
-        </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight">
+            {t(greetingKey())}, {ctx.member.name.split(" ")[0]}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {ctx.company.business_name}
+          </p>
+        </div>
+        <p className="font-mono text-xs text-muted-foreground">{today}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
         <StatCard
           size="hero"
           className="animate-fade-rise sm:col-span-2 lg:col-span-2 lg:row-span-2"
@@ -160,7 +178,7 @@ export default async function DashboardPage() {
           icon={FileText}
         />
         <StatCard
-          className="animate-fade-rise [animation-delay:240ms]"
+          className="animate-fade-rise [animation-delay:240ms] sm:col-span-2 lg:col-span-2"
           label={t("outstandingInvoices")}
           value={formatCurrency(outstandingTotal, region)}
           icon={Receipt}
@@ -168,8 +186,8 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+      <Card className="job-ticket">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pt-7">
           <CardTitle className="text-base">{t("needsAttention")}</CardTitle>
           {attention.length > 0 && (
             <Badge variant="secondary">{attention.length}</Badge>
@@ -177,26 +195,42 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           {attention.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              {t("noAttentionItems")}
-            </p>
+            <EmptyState
+              icon={PartyPopper}
+              title={t("noAttentionItems")}
+              className="border-none bg-transparent py-8"
+            />
           ) : (
             <ul className="divide-y">
-              {attention.map(({ key, icon: Icon, tone, label, href }) => (
+              {attention.map(({ key, icon: Icon, tone, label, code, detail, href }) => (
                 <li key={key}>
                   <Link
                     href={href}
-                    className="flex items-center gap-3 py-3 text-sm hover:text-primary"
+                    className="group flex items-center gap-3 rounded-md py-3 text-sm transition-colors hover:bg-muted/50"
                   >
-                    <Icon
-                      className={
+                    <span
+                      className={cn(
+                        "grid h-9 w-9 shrink-0 place-items-center rounded-full",
                         tone === "destructive"
-                          ? "h-4 w-4 text-destructive"
-                          : "h-4 w-4 text-warning"
-                      }
-                    />
-                    <span className="flex-1">{label}</span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-warning/10 text-warning"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-medium text-foreground">
+                        {label}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {code && (
+                          <span className="font-mono">{code}</span>
+                        )}
+                        {code && " · "}
+                        {detail}
+                      </span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                   </Link>
                 </li>
               ))}

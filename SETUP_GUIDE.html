@@ -59,7 +59,7 @@
   <div class="wrap">
     <div class="logo"><span class="badge">F</span> FieldOS AI</div>
     <h1>Project Setup Guide</h1>
-    <p>Everything you need to install, configure, run and deploy FieldOS AI — from a clean machine to a live Vercel deployment. Phase&nbsp;1 (Foundation) is production-ready.</p>
+    <p>Everything you need to install, configure, run and deploy FieldOS AI — from a clean machine to a live Vercel deployment. All&nbsp;6 phases of the spec are built and <code>npm run build</code> is green: CRM &amp; lead capture, AI estimating, scheduling &amp; dispatch, the technician PWA, invoicing &amp; finance intelligence, and retention. See <code>PROJECT_OVERVIEW.html</code> for what each module actually does.</p>
   </div>
 </header>
 
@@ -78,18 +78,25 @@
       <li><a href="#run">Run locally</a></li>
       <li><a href="#deploy">Deploy to Vercel</a></li>
       <li><a href="#postdeploy">Post-deploy checklist</a></li>
-      <li><a href="#integrations">Later-phase integrations</a></li>
+      <li><a href="#integrations">Optional integrations</a></li>
       <li><a href="#trouble">Troubleshooting</a></li>
     </ol>
   </nav>
 
   <div class="note info">
     <strong>What's in this build</strong>
-    Phase&nbsp;1 is complete: auth, the 6-step onboarding wizard, the office app shell, the
-    dashboard, the full CRM (customers, properties, timeline) and company settings, plus the
-    public marketing site and the complete database schema for every later module.
-    To run it you only need a <em>Supabase</em> project. The other services
-    (Anthropic, Stripe, Twilio, …) are only required as their modules ship in later phases.
+    The whole product is built and builds clean: auth + onboarding, CRM, AI lead scoring &amp;
+    capture (widget, voice receptionist, WhatsApp/SMS), AI estimating from text/photo, the
+    dispatch board with AI auto-scheduling and route optimisation, the technician PWA (offline
+    queueing, signatures, voice reports), invoicing &amp; Stripe payments, materials/inventory,
+    job-profitability &amp; revenue-forecast finance dashboards, the AI Business Coach/CFO, and
+    retention (reviews, renewals, team management). Realtime updates and German/English i18n
+    on the main screens are wired in.
+    <br /><br />
+    To run it locally you only need a <strong>Supabase</strong> project — everything else
+    (Anthropic, Stripe, Twilio, OpenAI, Resend, Google Maps) is <strong>optional</strong> and
+    degrades gracefully: the app runs and every screen renders without them, but the feature
+    each key powers won't actually do anything until it's set (see step&nbsp;6).
   </div>
 
   <!-- 1 -->
@@ -187,30 +194,42 @@ cp .env.example .env.local
 
 # PowerShell
 Copy-Item .env.example .env.local</code></pre>
-    <p>For Phase&nbsp;1 you only need the three Supabase values and the two app values. Everything else can stay blank until its phase.</p>
+    <p>You only need the three Supabase values and the two app values to get the app running end-to-end against real data. Every other key is optional — add it whenever you want that specific feature to come alive.</p>
 
     <table>
       <thead><tr><th>Variable</th><th>Needed for</th><th>Where to get it</th></tr></thead>
       <tbody>
-        <tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API</td></tr>
-        <tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API</td></tr>
-        <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><span class="pill p1">Phase 1</span></td><td>Supabase → Settings → API (secret)</td></tr>
-        <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td><span class="pill p1">Phase 1</span></td><td><code>http://localhost:3000</code> locally; your domain in prod</td></tr>
-        <tr><td><code>NEXT_PUBLIC_APP_NAME</code></td><td><span class="pill p1">Phase 1</span></td><td><code>FieldOS AI</code></td></tr>
-        <tr><td><code>CRON_SECRET</code></td><td><span class="pill p1">Phase 1</span></td><td>Any long random string (used by background jobs)</td></tr>
-        <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="pill later">Phase 2+</span></td><td><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a></td></tr>
-        <tr><td><code>OPENAI_API_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>OpenAI (Whisper transcription only)</td></tr>
-        <tr><td><code>STRIPE_SECRET_KEY</code> + price IDs</td><td><span class="pill later">Phase 2</span></td><td>Stripe dashboard → Developers</td></tr>
-        <tr><td><code>TWILIO_*</code></td><td><span class="pill later">Phase 3</span></td><td>Twilio console (Voice/SMS/WhatsApp)</td></tr>
-        <tr><td><code>RESEND_API_KEY</code></td><td><span class="pill later">Phase 2</span></td><td><a href="https://resend.com" target="_blank" rel="noopener">resend.com</a></td></tr>
-        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Phase 4</span></td><td>Google Cloud → Maps Platform (Distance Matrix + Routes APIs — auto-scheduler travel times &amp; route optimisation)</td></tr>
-        <tr><td><code>NEXT_PUBLIC_MAPBOX_TOKEN</code></td><td><span class="pill later">Phase 4</span></td><td><a href="https://mapbox.com" target="_blank" rel="noopener">mapbox.com</a> (map rendering)</td></tr>
+        <tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td><span class="pill p1">Required</span></td><td>Supabase → Settings → API</td></tr>
+        <tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td><span class="pill p1">Required</span></td><td>Supabase → Settings → API</td></tr>
+        <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><span class="pill p1">Required</span></td><td>Supabase → Settings → API (secret)</td></tr>
+        <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td><span class="pill p1">Required</span></td><td><code>http://localhost:3000</code> locally; your domain in prod</td></tr>
+        <tr><td><code>NEXT_PUBLIC_APP_NAME</code></td><td><span class="pill p1">Required</span></td><td><code>FieldOS AI</code></td></tr>
+        <tr><td><code>CRON_SECRET</code></td><td><span class="pill p1">Required</span></td><td>Any long random string — guards <code>/api/cron/*</code></td></tr>
+        <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="pill later">Optional</span></td><td><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> — powers every AI feature: estimating, lead scoring, voice receptionist, AI Coach/CFO, revenue-forecast narrative</td></tr>
+        <tr><td><code>OPENAI_API_KEY</code></td><td><span class="pill later">Optional</span></td><td>OpenAI — Whisper transcription for technician voice reports only</td></tr>
+        <tr><td><code>STRIPE_SECRET_KEY</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → API keys</td></tr>
+        <tr><td><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → API keys</td></tr>
+        <tr><td><code>STRIPE_WEBHOOK_SECRET</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → Webhooks (endpoint <code>/api/stripe/webhook</code>)</td></tr>
+        <tr><td><code>STRIPE_PRICE_ID_STARTER</code> / <code>_GROWTH</code> / <code>_PRO</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Products (subscription plan prices)</td></tr>
+        <tr><td><code>STRIPE_CONNECT_CLIENT_ID</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Connect → Settings (lets each company accept invoice payments)</td></tr>
+        <tr><td><code>TWILIO_ACCOUNT_SID</code> / <code>TWILIO_AUTH_TOKEN</code></td><td><span class="pill later">Optional</span></td><td>Twilio console — voice receptionist + WhatsApp/SMS lead capture</td></tr>
+        <tr><td><code>TWILIO_WHATSAPP_FROM</code></td><td><span class="pill later">Optional</span></td><td>Twilio WhatsApp sandbox/sender, e.g. <code>whatsapp:+14155238886</code></td></tr>
+        <tr><td><code>TWILIO_SMS_FROM</code></td><td><span class="pill later">Optional</span></td><td>A Twilio phone number, e.g. <code>+44...</code></td></tr>
+        <tr><td><code>RESEND_API_KEY</code> / <code>RESEND_FROM_EMAIL</code></td><td><span class="pill later">Optional</span></td><td><a href="https://resend.com" target="_blank" rel="noopener">resend.com</a> — quote/invoice/team-invite emails</td></tr>
+        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Optional</span></td><td>Google Cloud → Maps Platform, enable <strong>Distance Matrix API</strong> + <strong>Routes API</strong> — auto-scheduler travel times &amp; route optimisation</td></tr>
+        <tr><td><code>NEXT_PUBLIC_MAPBOX_TOKEN</code></td><td><span class="pill later">Optional</span></td><td><a href="https://mapbox.com" target="_blank" rel="noopener">mapbox.com</a> (map rendering)</td></tr>
+        <tr><td><code>PUPPETEER_EXECUTABLE_PATH</code></td><td><span class="pill later">Optional (local only)</span></td><td>Path to a local Chrome/Edge install, used to render estimate/invoice PDFs in dev. Unused on Vercel (a bundled serverless Chromium is used there instead).</td></tr>
       </tbody>
     </table>
 
     <div class="note info">
       <strong>Good to know</strong>
-      <code>lib/env.ts</code> reads server secrets lazily and throws a clear error only when a still-unconfigured feature is actually used — so a missing Stripe key won't break Phase&nbsp;1 pages. Integration-backed features (Twilio voice/SMS/WhatsApp, OpenAI Whisper voice reports, Google Maps routing, Resend email) all <strong>degrade gracefully</strong>: without the key the feature shows a friendly "not available" message or falls back (e.g. typing a report instead of recording), rather than crashing.
+      <code>lib/env.ts</code> reads server secrets lazily and throws a clear error only when a still-unconfigured feature is actually used — so a missing Stripe key won't break the rest of the app. Integration-backed features (Twilio voice/SMS/WhatsApp, OpenAI Whisper voice reports, Google Maps routing, Resend email, Anthropic) all <strong>degrade gracefully</strong>: without the key the feature shows a friendly "not available" message or falls back (e.g. typing a report instead of recording, a deterministic fallback narrative instead of an AI one), rather than crashing.
+    </div>
+
+    <div class="note warn">
+      <strong>The Twilio voice number is set per company, not in env</strong>
+      After adding the Twilio keys, each company sets its own inbound number in <strong>Settings → Lead capture</strong> (stored as <code>companies.twilio_voice_number</code>) — that's how an inbound call is matched to the right company when you have more than one.
     </div>
   </section>
 
@@ -296,17 +315,18 @@ Copy-Item .env.example .env.local</code></pre>
 
   <!-- 11 -->
   <section id="integrations">
-    <h2><span class="step">11</span>Later-phase integrations</h2>
-    <p>These are <strong>not required for Phase&nbsp;1</strong>. Add each key when you build its module — the relevant routes will start working once the key is present.</p>
+    <h2><span class="step">11</span>Optional integrations — what each one unlocks</h2>
+    <p>None of these are required to run the app or explore the UI. Add a key whenever you want its feature to actually work end-to-end instead of showing its graceful fallback.</p>
     <table>
-      <thead><tr><th>Service</th><th>Phase</th><th>Used for</th></tr></thead>
+      <thead><tr><th>Service</th><th>Unlocks</th></tr></thead>
       <tbody>
-        <tr><td><strong>Anthropic (Claude)</strong></td><td>2+</td><td>Estimating, lead scoring, summaries, AI CFO/Coach, vision photo estimates</td></tr>
-        <tr><td><strong>Stripe</strong></td><td>2</td><td>Subscription billing + Connect/Payment Links (0.5% fee) for invoices</td></tr>
-        <tr><td><strong>Resend</strong></td><td>2</td><td>Transactional email (quotes, invoices, team invites)</td></tr>
-        <tr><td><strong>Twilio</strong></td><td>3</td><td>AI voice receptionist, WhatsApp/SMS leads &amp; follow-ups</td></tr>
-        <tr><td><strong>OpenAI Whisper</strong></td><td>4</td><td>Voice transcription for job reports</td></tr>
-        <tr><td><strong>Google Maps + Mapbox</strong></td><td>4</td><td>Geocoding, routing/traffic (Google) + map rendering (Mapbox)</td></tr>
+        <tr><td><strong>Anthropic (Claude)</strong></td><td>AI estimating from text/photo, lead scoring, voice-receptionist call summaries, AI Business Coach &amp; AI CFO chat, dynamic nudge chips, revenue-forecast narrative</td></tr>
+        <tr><td><strong>Stripe</strong></td><td>Subscription billing (Starter/Growth/Pro) + Stripe Connect so each company can take card payments on invoices</td></tr>
+        <tr><td><strong>Resend</strong></td><td>Transactional email — quotes, invoices, team invites, supplier restock requests</td></tr>
+        <tr><td><strong>Twilio</strong></td><td>The AI voice receptionist (answers calls, books leads), inbound WhatsApp/SMS lead capture, review-request &amp; renewal-reminder messages</td></tr>
+        <tr><td><strong>OpenAI (Whisper)</strong></td><td>Voice-to-text for technician job reports (falls back to typing a report without it)</td></tr>
+        <tr><td><strong>Google Maps Platform</strong></td><td>Real travel-time scoring in the AI auto-scheduler (Distance Matrix) and route optimisation for multi-stop days (Routes API) — both degrade to a simpler heuristic without a key</td></tr>
+        <tr><td><strong>Mapbox</strong></td><td>Map rendering on the dispatch board</td></tr>
       </tbody>
     </table>
     <div class="note info">
@@ -344,8 +364,11 @@ Copy-Item .env.example .env.local</code></pre>
     <h3>Build fails on an ESLint "unused variable" error</h3>
     <p>The production build is lint-gated. Remove the unused import/variable it names, then rebuild.</p>
 
-    <h3>Language is wrong</h3>
-    <p>The UI locale follows the company's <em>Language</em> setting (stored in a cookie), not the URL. Change it in <strong>Settings</strong> or during onboarding.</p>
+    <h3>Language is wrong, or won't switch back</h3>
+    <p>The UI locale follows a <code>NEXT_LOCALE</code> cookie, not the URL. Switch it any time from the language item in the user menu (top right) — it toggles immediately. <strong>Settings → Company</strong> sets the same cookie and is also the default new team members get at login.</p>
+
+    <h3>Translations are only partial in German</h3>
+    <p>By design: the main office list pages (leads, calls, schedule, materials, finance, coach, reviews, team) are translated. Detail pages, dialogs, status-badge labels, and the entire technician PWA (<code>/tech/*</code>) are still English-only — a full pass is tracked as outstanding work, not a bug.</p>
   </section>
 
 </div>

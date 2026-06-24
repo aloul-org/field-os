@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { LogOut, Languages, Settings as SettingsIcon } from "lucide-react";
 
 import { initials } from "@/lib/format";
@@ -25,15 +25,14 @@ export function UserMenu({
   email,
   role,
   avatarUrl,
-  currentLanguage,
 }: {
   name: string;
   email: string;
   role: TeamRole;
   avatarUrl: string | null;
-  currentLanguage: "en" | "de";
 }) {
   const t = useTranslations("nav");
+  const locale = useLocale() as "en" | "de";
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -69,12 +68,10 @@ export function UserMenu({
           <SettingsIcon className="h-4 w-4" /> {t("settings")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() =>
-            switchLanguage(currentLanguage === "en" ? "de" : "en")
-          }
+          onClick={() => switchLanguage(locale === "en" ? "de" : "en")}
         >
           <Languages className="h-4 w-4" />
-          {currentLanguage === "en" ? "Deutsch" : "English"}
+          {locale === "en" ? "Deutsch" : "English"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

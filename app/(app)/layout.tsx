@@ -39,7 +39,6 @@ export default async function AppLayout({
           userEmail={ctx.member.email}
           role={ctx.role}
           avatarUrl={ctx.member.avatar_url}
-          language={ctx.company.language}
           unread={count ?? 0}
         />
         <main className="flex-1 px-4 pb-24 pt-6 lg:px-6 lg:pb-10">

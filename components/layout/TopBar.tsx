@@ -8,7 +8,6 @@ export function TopBar({
   userEmail,
   role,
   avatarUrl,
-  language,
   unread = 0,
 }: {
   companyName: string;
@@ -16,7 +15,6 @@ export function TopBar({
   userEmail: string;
   role: TeamRole;
   avatarUrl: string | null;
-  language: "en" | "de";
   unread?: number;
 }) {
   return (
@@ -37,7 +35,6 @@ export function TopBar({
           email={userEmail}
           role={role}
           avatarUrl={avatarUrl}
-          currentLanguage={language}
         />
       </div>
     </header>
