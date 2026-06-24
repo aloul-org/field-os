@@ -129,6 +129,11 @@ const config: Config = {
           "50%": { transform: "translateX(0%) scaleX(0.6)" },
           "100%": { transform: "translateX(100%) scaleX(0.35)" },
         },
+        // Gentle bob for the marketing hero's floating accent cards.
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-7px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -142,6 +147,7 @@ const config: Config = {
         "pulse-ring": "pulse-ring 2.4s cubic-bezier(0.16,1,0.3,1) infinite",
         shimmer: "shimmer 2s infinite",
         "progress-indeterminate": "progress-indeterminate 1.1s ease-in-out infinite",
+        float: "float 4s ease-in-out infinite",
       },
     },
   },
