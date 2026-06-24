@@ -3,11 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { LogOut, Languages, Settings as SettingsIcon } from "lucide-react";
+import {
+  LogOut,
+  Languages,
+  Settings as SettingsIcon,
+  Compass,
+  BookOpen,
+} from "lucide-react";
 
 import { initials } from "@/lib/format";
 import { ROLE_LABELS } from "@/lib/auth/roles";
 import { setLocaleCookie } from "@/i18n/actions";
+import { useTour } from "@/lib/stores/tour";
 import { logout } from "@/app/(app)/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,6 +41,7 @@ export function UserMenu({
   const t = useTranslations("nav");
   const locale = useLocale() as "en" | "de";
   const router = useRouter();
+  const openTour = useTour((s) => s.setOpen);
   const [, startTransition] = useTransition();
 
   function switchLanguage(lang: "en" | "de") {
@@ -72,6 +80,15 @@ export function UserMenu({
         >
           <Languages className="h-4 w-4" />
           {locale === "en" ? "Deutsch" : "English"}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => openTour(true)}>
+          <Compass className="h-4 w-4" /> Take the tour
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a href="/USER_MANUAL.html" target="_blank" rel="noopener noreferrer">
+            <BookOpen className="h-4 w-4" /> User manual
+          </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

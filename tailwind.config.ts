@@ -123,6 +123,12 @@ const config: Config = {
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
+        // The modern top loader shown during route transitions.
+        "progress-indeterminate": {
+          "0%": { transform: "translateX(-100%) scaleX(0.35)" },
+          "50%": { transform: "translateX(0%) scaleX(0.6)" },
+          "100%": { transform: "translateX(100%) scaleX(0.35)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -135,6 +141,7 @@ const config: Config = {
         "draw-line": "draw-line 1.1s cubic-bezier(0.16,1,0.3,1) forwards",
         "pulse-ring": "pulse-ring 2.4s cubic-bezier(0.16,1,0.3,1) infinite",
         shimmer: "shimmer 2s infinite",
+        "progress-indeterminate": "progress-indeterminate 1.1s ease-in-out infinite",
       },
     },
   },

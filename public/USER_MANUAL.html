@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FieldOS AI — User Manual</title>
+<style>
+  :root{
+    --orange:#FF5A1F; --orange-d:#E8480F; --ink:#15181B; --ink-2:#2B3034;
+    --muted:#5B6770; --line:#E2DFD9; --paper:#FAF9F7; --card:#ffffff;
+    --paper-2:#F0EEEA; --code:#15181B; --code-ink:#FAF9F7;
+    --ok-bg:#ecfdf5; --ok-line:#15803D; --warn-bg:#fffbeb; --warn-line:#CA8A04;
+    --info-bg:#FFF4ED; --info-line:#FF5A1F;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(46rem 46rem at 100% -8%, rgba(255,90,31,.06), transparent 60%),radial-gradient(34rem 34rem at -8% 108%, rgba(255,90,31,.05), transparent 55%);background-attachment:fixed}
+  header.hero{background:linear-gradient(135deg,var(--ink),#21262b);color:#fff;padding:54px 24px;position:relative;overflow:hidden}
+  header.hero:after{content:"";position:absolute;inset:0;background:radial-gradient(40rem 30rem at 100% -20%, rgba(255,90,31,.4), transparent 55%);pointer-events:none}
+  header .wrap{max-width:920px;margin:0 auto;position:relative}
+  header .logo{display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:20px}
+  header .logo .badge{width:38px;height:38px;border-radius:10px;background:var(--orange);display:grid;place-items:center;font-size:18px;font-weight:800}
+  header h1{margin:20px 0 8px;font-size:34px;letter-spacing:-.02em}
+  header p{margin:0;opacity:.85;max-width:60ch}
+  .layout{max-width:920px;margin:0 auto;padding:0 24px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin:28px 0;box-shadow:0 4px 12px rgba(21,24,27,.05)}
+  nav.toc h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:36px}
+  nav.toc li{margin:3px 0}
+  nav.toc a{color:var(--orange-d);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 30px;margin:0 0 22px;box-shadow:0 1px 2px rgba(21,24,27,.04),0 4px 12px rgba(21,24,27,.05)}
+  section h2{margin:0 0 6px;font-size:24px;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  section h2 .num{display:inline-grid;place-items:center;min-width:32px;height:32px;border-radius:9px;background:var(--orange);color:#fff;font-size:15px;font-weight:700}
+  .lead{color:var(--muted);margin:0 0 18px}
+  .page{border-left:3px solid var(--orange);background:var(--paper);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0}
+  .page h3{margin:0 0 4px;font-size:17px}
+  .page .route{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--orange-d);background:#FFF4ED;border:1px solid #FFE3D1;border-radius:6px;padding:1px 7px;display:inline-block;margin-bottom:8px}
+  .page p{margin:6px 0}
+  .page .who{font-size:13px;color:var(--muted)}
+  .page b{color:var(--ink)}
+  p,li{color:var(--ink-2)}
+  code{background:var(--paper-2);padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+  kbd{background:var(--ink);color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-family:ui-monospace,monospace}
+  .note{border-radius:10px;padding:12px 16px;margin:16px 0;border-left:4px solid}
+  .note.info{background:var(--info-bg);border-color:var(--info-line)}
+  .note.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+  .note.ok{background:var(--ok-bg);border-color:var(--ok-line)}
+  .note strong{display:block;margin-bottom:2px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:#FFE3D1;color:var(--orange-d);vertical-align:middle}
+  .pill.ai{background:#EDE9FE;color:#6D28D9}
+  ul.steps{margin:8px 0;padding-left:18px}
+  ul.steps li{margin:5px 0}
+  footer{max-width:920px;margin:10px auto 60px;padding:0 24px;color:var(--muted);font-size:13px}
+  a{color:var(--orange-d)}
+  .kbd-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="logo"><span class="badge">F</span> FieldOS AI</div>
+    <h1>User Manual</h1>
+    <p>Every screen in FieldOS AI — what it's for, who uses it, and how to get things done. New here? Start with the in-app tour (your profile menu → <b>Take the tour</b>), then keep this open as your reference.</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#start">Getting started</a></li>
+      <li><a href="#navigate">Finding your way around</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#leads">Leads</a></li>
+      <li><a href="#calls">Calls</a></li>
+      <li><a href="#schedule">Schedule &amp; dispatch</a></li>
+      <li><a href="#jobs">Jobs</a></li>
+      <li><a href="#estimates">Estimates</a></li>
+      <li><a href="#invoices">Invoices</a></li>
+      <li><a href="#customers">Customers</a></li>
+      <li><a href="#materials">Materials</a></li>
+      <li><a href="#finance">Finance &amp; AI CFO</a></li>
+      <li><a href="#coach">AI Business Coach</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#tech">Technician app</a></li>
+      <li><a href="#customer">What your customers see</a></li>
+      <li><a href="#roles">Roles &amp; who sees what</a></li>
+    </ol>
+  </nav>
+
+  <!-- GETTING STARTED -->
+  <section id="start">
+    <h2><span class="num">1</span>Getting started</h2>
+    <p class="lead">Create your account, set up your business once, and you're ready to take work.</p>
+
+    <div class="page">
+      <h3>Create an account &amp; log in</h3>
+      <span class="route">/register · /login</span>
+      <p>Start a free trial with your email, or use <b>Continue with Google</b> if your team enabled it. Forgot your password? Use <span class="route">/login/reset</span> to get a reset link by email.</p>
+    </div>
+
+    <div class="page">
+      <h3>The setup wizard</h3>
+      <span class="route">/onboarding</span>
+      <p>A short, six-step wizard the first time you sign in. Work through it in order:</p>
+      <ul class="steps">
+        <li><b>Company</b> — your business name, contact details and language (English/German).</li>
+        <li><b>Trade</b> — your main trade(s); this tunes the AI's estimating and lead scoring.</li>
+        <li><b>Pricing defaults</b> — hourly rate, call-out fee, VAT and payment terms. These pre-fill every quote and invoice.</li>
+        <li><b>Team</b> — invite the people who'll use FieldOS (you can skip and do this later).</li>
+        <li><b>Plan</b> — pick a subscription (Starter / Growth / Pro).</li>
+        <li><b>Integrations</b> — optionally connect phone, payments and email now, or later from Settings.</li>
+      </ul>
+      <div class="note ok"><strong>Tip</strong>Anything you skip here you can finish later in <a href="#settings">Settings</a>. Nothing is locked in.</div>
+    </div>
+
+    <div class="page">
+      <h3>The welcome tour</h3>
+      <p>The first time you reach the dashboard, a guided tour pops up and walks you through each area in about a minute. Re-run it any time from your <b>profile menu (top-right) → Take the tour</b>.</p>
+    </div>
+  </section>
+
+  <!-- NAVIGATION -->
+  <section id="navigate">
+    <h2><span class="num">2</span>Finding your way around</h2>
+    <p class="lead">Three ways to move through the app — pick whichever is fastest for you.</p>
+
+    <div class="page">
+      <h3>The command palette <span class="pill">fastest</span></h3>
+      <div class="kbd-row">Press <kbd>Ctrl</kbd> + <kbd>K</kbd> &nbsp;(or <kbd>⌘</kbd> + <kbd>K</kbd> on a Mac)</div>
+      <p>A search box opens from anywhere. Start typing to <b>jump to any page</b> or run a <b>quick action</b> like “New estimate” or “Ask the AI Coach”. Use the arrow keys to choose and <kbd>Enter</kbd> to go; <kbd>Esc</kbd> closes it. It only ever shows what your role can access.</p>
+    </div>
+
+    <div class="page">
+      <h3>The sidebar</h3>
+      <p>On the left (desktop) your sections sit as <b>stops on a route line</b> — the glowing orange stop is the page you're on. On phones and tablets the same navigation lives in the bottom bar, with a <b>More</b> button for the rest.</p>
+    </div>
+
+    <div class="page">
+      <h3>The top bar</h3>
+      <p>Holds the search box (opens the command palette), the <b>notifications bell</b>, and your <b>profile menu</b> — where you switch language (English ⇄ German), replay the tour, open this manual, and log out.</p>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <h2><span class="num">3</span>Dashboard</h2>
+    <div class="page">
+      <h3>Your daily overview</h3>
+      <span class="route">/dashboard</span>
+      <p class="who">Everyone with office access</p>
+      <p><b>What it's for:</b> a glance at how the business is doing today — revenue this month, jobs booked today, estimates awaiting a reply, and money outstanding.</p>
+      <p><b>How to use it:</b> the <b>Needs attention</b> card lists the things worth acting on right now — hot leads, emergency jobs with no slot yet, and overdue invoices. Click any row to jump straight to it.</p>
+    </div>
+  </section>
+
+  <!-- LEADS -->
+  <section id="leads">
+    <h2><span class="num">4</span>Leads</h2>
+    <div class="page">
+      <h3>Leads inbox</h3>
+      <span class="route">/leads</span>
+      <p class="who">Owner, Admin, Dispatcher, Estimator</p>
+      <p><b>What it's for:</b> every new enquiry in one place — from your website widget, the phone receptionist, WhatsApp and SMS, or added by hand.</p>
+      <p><b>How to use it:</b> each lead is scored <b>hot / warm / cold</b> by the AI (the coloured rail on the left flags the hot ones). Filter with the tabs along the top, or click <b>Add lead</b> to enter one manually.</p>
+    </div>
+    <div class="page">
+      <h3>Lead detail</h3>
+      <span class="route">/leads/[id]</span>
+      <p><b>How to use it:</b> read the enquiry and the AI's reasoning, then <b>assign it to a technician</b> (FieldOS suggests the best skill match), mark it contacted / lost / converted, or click through to <b>create an estimate</b> pre-filled from the lead's details.</p>
+    </div>
+  </section>
+
+  <!-- CALLS -->
+  <section id="calls">
+    <h2><span class="num">5</span>Calls</h2>
+    <div class="page">
+      <h3>Call log</h3>
+      <span class="route">/calls · /calls/[id]</span>
+      <p class="who">Owner, Admin, Dispatcher</p>
+      <p><b>What it's for:</b> a record of calls handled by the AI voice receptionist, each with the caller's details, what they wanted, and an AI summary.</p>
+      <p><b>How to use it:</b> open a call to read the full summary and the captured issue/address/urgency. Calls that look like real work become leads automatically. <span class="pill">Requires Twilio</span></p>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="schedule">
+    <h2><span class="num">6</span>Schedule &amp; dispatch</h2>
+    <div class="page">
+      <h3>Dispatch board</h3>
+      <span class="route">/schedule</span>
+      <p class="who">Owner, Admin, Dispatcher</p>
+      <p><b>What it's for:</b> plan the day across your whole team — one lane per technician, with a panel of jobs still waiting for a slot.</p>
+      <p><b>How to use it:</b></p>
+      <ul class="steps">
+        <li>Use the date arrows to move between days.</li>
+        <li>Schedule a waiting job into a slot, or let <b>“Suggest best technician &amp; slot”</b> rank your team by skills, travel time and overtime. <span class="pill ai">AI</span></li>
+        <li>For an emergency with no room, <b>“Fit in today”</b> proposes bumping the safest lower-priority job to tomorrow — you confirm before anything moves.</li>
+        <li>When a technician has three or more stops, <b>Optimise route</b> reorders them for the least driving and shows drive-times. <span class="pill">Needs Google Maps key</span></li>
+        <li>The board updates <b>live</b> as the team works — no need to refresh.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section id="jobs">
+    <h2><span class="num">7</span>Jobs</h2>
+    <div class="page">
+      <h3>Jobs list</h3>
+      <span class="route">/jobs</span>
+      <p class="who">Owner, Admin, Dispatcher</p>
+      <p><b>What it's for:</b> all work in progress and its status, from unscheduled through to completed and invoiced.</p>
+    </div>
+    <div class="page">
+      <h3>Job detail</h3>
+      <span class="route">/jobs/[id]</span>
+      <p><b>How to use it:</b> see the customer, appointments, the technician's photos, the report and any captured signature. Add or reschedule appointments here. Once a job is completed or invoiced, the <b>follow-up card</b> lets you request a review or set up a maintenance renewal in one click.</p>
+    </div>
+  </section>
+
+  <!-- ESTIMATES -->
+  <section id="estimates">
+    <h2><span class="num">8</span>Estimates</h2>
+    <div class="page">
+      <h3>Estimates list</h3>
+      <span class="route">/estimates</span>
+      <p class="who">Owner, Admin, Estimator</p>
+      <p><b>What it's for:</b> every quote you've drafted or sent, with its status and win probability.</p>
+    </div>
+    <div class="page">
+      <h3>Build an estimate</h3>
+      <span class="route">/estimates/new</span>
+      <p><b>How to use it:</b> three ways to start, all on one screen:</p>
+      <ul class="steps">
+        <li><b>Type</b> a description of the work,</li>
+        <li><b>Photo</b> — upload pictures and let the AI read what's needed,</li>
+        <li><b>Speak</b> — describe the job out loud.</li>
+      </ul>
+      <p>The AI drafts itemised lines and a price using your rates and past jobs as anchors. <b>You always review and edit before sending</b> — and the totals are recalculated by FieldOS, never guessed by the AI. <span class="pill ai">AI</span> <span class="pill">Requires Anthropic</span></p>
+    </div>
+    <div class="page">
+      <h3>Estimate detail</h3>
+      <span class="route">/estimates/[id]</span>
+      <p><b>How to use it:</b> fine-tune line items, then <b>send</b> the quote. The customer gets a link to accept online; when they do, a job is created automatically.</p>
+    </div>
+  </section>
+
+  <!-- INVOICES -->
+  <section id="invoices">
+    <h2><span class="num">9</span>Invoices</h2>
+    <div class="page">
+      <h3>Invoices list</h3>
+      <span class="route">/invoices</span>
+      <p class="who">Owner, Admin (Viewer: read-only)</p>
+      <p><b>What it's for:</b> everything you've billed and what's still owed (sent, paid, overdue).</p>
+    </div>
+    <div class="page">
+      <h3>Invoice detail</h3>
+      <span class="route">/invoices/[id]</span>
+      <p><b>How to use it:</b> raise an invoice from a job or estimate, edit it, then <b>send</b> it with a payment link. Mark it <b>paid</b> when money arrives (or it's marked automatically when paid by card). The moment it's paid, the job's real profit is calculated. <span class="pill">Card payments need Stripe</span></p>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section id="customers">
+    <h2><span class="num">10</span>Customers</h2>
+    <div class="page">
+      <h3>Customer list &amp; detail</h3>
+      <span class="route">/customers · /customers/[id]</span>
+      <p class="who">Owner, Admin, Dispatcher, Estimator</p>
+      <p><b>What it's for:</b> your address book — contact details, their properties, and a full history of leads, quotes, jobs and invoices.</p>
+      <p><b>How to use it:</b> open a customer to add a property, see everything you've done for them, and start a new quote or job from their record.</p>
+    </div>
+  </section>
+
+  <!-- MATERIALS -->
+  <section id="materials">
+    <h2><span class="num">11</span>Materials</h2>
+    <div class="page">
+      <h3>Materials &amp; stock</h3>
+      <span class="route">/materials</span>
+      <p class="who">Owner, Admin</p>
+      <p><b>What it's for:</b> track parts and stock levels, with a banner when something's running low.</p>
+      <p><b>How to use it:</b> add materials and suppliers, set stock levels, and use <b>Restock</b> to draft a supplier request (emailed for you, or copy the text). A consumption forecast estimates when you'll run out. <span class="pill ai">AI summary</span></p>
+    </div>
+  </section>
+
+  <!-- FINANCE -->
+  <section id="finance">
+    <h2><span class="num">12</span>Finance &amp; AI CFO</h2>
+    <div class="page">
+      <h3>Finance dashboard</h3>
+      <span class="route">/finance</span>
+      <p class="who">Owner, Admin (Viewer: read-only)</p>
+      <p><b>What it's for:</b> your real profit — not just turnover. See profitability broken down by job, technician, service and customer, plus a forecast of next month's revenue.</p>
+      <p><b>How to use it:</b> switch tabs to change the breakdown. Profit per job uses labour (hours × rate), materials, and a fair share of overheads. The forecast uses your own trend and seasonality; the AI only writes the plain-English summary. <span class="pill ai">AI narrative</span></p>
+    </div>
+    <div class="page">
+      <h3>AI CFO</h3>
+      <span class="route">/finance/ai-cfo</span>
+      <p><b>What it's for:</b> ask money questions in plain English — “Which service makes the best margin?”, “How did revenue move this quarter?”</p>
+      <p><b>How to use it:</b> type a question. The assistant pulls the real figures from your finance data to answer; it never invents numbers. <span class="pill ai">AI</span></p>
+    </div>
+  </section>
+
+  <!-- COACH -->
+  <section id="coach">
+    <h2><span class="num">13</span>AI Business Coach</h2>
+    <div class="page">
+      <h3>Coach</h3>
+      <span class="route">/coach</span>
+      <p class="who">Owner, Admin (Viewer: read-only)</p>
+      <p><b>What it's for:</b> a wider business advisor — leads, conversion, win rates and profit — that answers from your own data.</p>
+      <p><b>How to use it:</b> start with a suggested question, or ask your own. Smart chips appear only when something's worth flagging (e.g. a real drop in win rate). Past conversations are saved in the rail on the left. <span class="pill ai">AI</span></p>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews">
+    <h2><span class="num">14</span>Reviews</h2>
+    <div class="page">
+      <h3>Reviews &amp; recovery</h3>
+      <span class="route">/reviews</span>
+      <p class="who">Owner, Admin</p>
+      <p><b>What it's for:</b> turn happy customers into public reviews, and catch unhappy ones privately first.</p>
+      <p><b>How to use it:</b> send a <b>review request</b> after a job (it tries WhatsApp, then SMS, then email). If feedback is poor, <b>log a bad review</b> to flag the customer, alert the office, and get a suggested outreach message — so you fix it before it goes public. <span class="pill">Messaging needs Twilio</span></p>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <h2><span class="num">15</span>Team</h2>
+    <div class="page">
+      <h3>Team management</h3>
+      <span class="route">/team</span>
+      <p class="who">Owner, Admin only</p>
+      <p><b>What it's for:</b> the people in your company and what they can do.</p>
+      <p><b>How to use it:</b> invite members by email, set each person's <b>role</b> (which decides what they can see and change), and deactivate anyone who's left. The owner account is protected and can't be locked out.</p>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settings">
+    <h2><span class="num">16</span>Settings</h2>
+    <p class="lead">Set your business up once; everything else inherits from here.</p>
+    <div class="page">
+      <h3>Company &amp; defaults</h3>
+      <span class="route">/settings</span>
+      <p><b>How to use it:</b> business name, contact details, branding, language, VAT, payment terms, hourly rate, call-out fee and monthly overhead. These feed quotes, invoices and the profit calculations.</p>
+    </div>
+    <div class="page">
+      <h3>Billing</h3>
+      <span class="route">/settings/billing</span>
+      <p class="who">Owner only</p>
+      <p>Your FieldOS subscription plan and payment details. <span class="pill">Stripe</span></p>
+    </div>
+    <div class="page">
+      <h3>Lead capture (website widget)</h3>
+      <span class="route">/settings/lead-capture</span>
+      <p>Turn on the embeddable “Get a quote” widget for your website and copy the snippet. Submissions arrive in your <a href="#leads">Leads</a> inbox, scored automatically.</p>
+    </div>
+    <div class="page">
+      <h3>Voice receptionist</h3>
+      <span class="route">/settings/voice-receptionist</span>
+      <p>Set the greeting and the inbound phone number the AI receptionist answers on. <span class="pill">Twilio</span></p>
+    </div>
+    <div class="page">
+      <h3>Integrations &amp; notifications</h3>
+      <span class="route">/settings/integrations · /settings/notifications</span>
+      <p>Connect optional services (payments, messaging, maps, email) and choose what you get notified about. Every integration is optional — without it, the matching feature simply stays quiet rather than breaking.</p>
+    </div>
+  </section>
+
+  <!-- TECH -->
+  <section id="tech">
+    <h2><span class="num">17</span>Technician app</h2>
+    <p class="lead">A separate, phone-first app for the field — dark, big buttons, works with no signal. Technicians are taken here automatically when they log in.</p>
+    <div class="page">
+      <h3>Today</h3>
+      <span class="route">/tech/today</span>
+      <p><b>How to use it:</b> the day's jobs in order. Tap the big status button to move a job along — <b>scheduled → on my way → in progress → complete</b>. Optionally turn on <b>location sharing</b> so the office can see you're en route.</p>
+    </div>
+    <div class="page">
+      <h3>Job detail</h3>
+      <span class="route">/tech/jobs/[id]</span>
+      <p><b>How to use it:</b> work the checklist, snap <b>before/after photos</b>, record a quick <b>voice report</b> (transcribed and tidied for you), and capture the customer's <b>signature</b> to finish. No signal? Photos and reports queue up and upload themselves when you're back online.</p>
+    </div>
+    <div class="page">
+      <h3>Copilot</h3>
+      <span class="route">/tech/copilot</span>
+      <p><b>How to use it:</b> a job-aware assistant for on-site questions — “how do I bleed this type of radiator?” <span class="pill ai">AI</span></p>
+    </div>
+    <div class="page">
+      <h3>Profile &amp; install</h3>
+      <span class="route">/tech/profile</span>
+      <p><b>How to use it:</b> your details and log out. <b>Install it like an app</b> via your browser's “Add to Home Screen”, so it opens full-screen and loads instantly.</p>
+    </div>
+  </section>
+
+  <!-- CUSTOMER -->
+  <section id="customer">
+    <h2><span class="num">18</span>What your customers see</h2>
+    <p class="lead">Clean, no-login pages that ask for one simple decision. You don't manage these directly — they're the links you send.</p>
+    <div class="page">
+      <h3>Accept a quote</h3>
+      <span class="route">/quote/[token]</span>
+      <p>When you send an estimate, the customer opens a tidy page showing the quote and a single <b>Accept</b> button. Accepting creates the job for you automatically.</p>
+    </div>
+    <div class="page">
+      <h3>Pay an invoice</h3>
+      <span class="route">/invoice/[token]</span>
+      <p>The invoice with one <b>Pay now</b> button. Paid invoices update in FieldOS and trigger the profit calculation. <span class="pill">Stripe</span></p>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section id="roles">
+    <h2><span class="num">19</span>Roles &amp; who sees what</h2>
+    <p class="lead">Each team member has a role. It controls which sections appear for them and whether they can make changes.</p>
+    <div class="page">
+      <h3>Owner</h3><p>Everything, including billing. Can't be deactivated.</p>
+    </div>
+    <div class="page">
+      <h3>Admin</h3><p>Everything except billing.</p>
+    </div>
+    <div class="page">
+      <h3>Dispatcher</h3><p>Dashboard, schedule, jobs, leads, calls and customers — the day-to-day operations.</p>
+    </div>
+    <div class="page">
+      <h3>Estimator</h3><p>Dashboard, estimates, customers and leads — focused on winning work.</p>
+    </div>
+    <div class="page">
+      <h3>Technician</h3><p>The technician app only (no office screens).</p>
+    </div>
+    <div class="page">
+      <h3>Viewer</h3><p>Read-only across the office app; can't change anything or manage the team/billing.</p>
+    </div>
+    <div class="note info"><strong>Sensitive areas</strong>Finance, the AI CFO and the Coach are limited to Owner and Admin (and read-only Viewer). The command palette and sidebar automatically hide anything your role can't open.</div>
+  </section>
+
+</div>
+
+<footer>
+  FieldOS AI — user manual. For installation and configuration see <code>SETUP_GUIDE.html</code>; for a high-level product overview see <code>PROJECT_OVERVIEW.html</code>.
+</footer>
+</body>
+</html>

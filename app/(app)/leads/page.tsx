@@ -103,8 +103,18 @@ export default async function LeadsPage({
             const summary =
               lead.job_description || lead.raw_message || "No details yet";
             const status = LEAD_STATUS_META[lead.status];
+            const accent =
+              lead.score === "hot"
+                ? "destructive"
+                : lead.score === "warm"
+                  ? "warning"
+                  : "default";
             return (
-              <JobTicketCard key={lead.id} href={`/leads/${lead.id}`}>
+              <JobTicketCard
+                key={lead.id}
+                href={`/leads/${lead.id}`}
+                accent={accent}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

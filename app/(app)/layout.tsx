@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { TopBar } from "@/components/layout/TopBar";
 import { CommandMenu } from "@/components/layout/CommandMenu";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { WelcomeTour } from "@/components/onboarding/WelcomeTour";
 
 export default async function AppLayout({
   children,
@@ -51,6 +52,7 @@ export default async function AppLayout({
         <MobileNav items={items} />
       </div>
       <CommandMenu items={items} />
+      <WelcomeTour available={items.map((i) => i.href)} />
     </div>
   );
 }

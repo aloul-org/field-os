@@ -20,6 +20,10 @@ import { StatCard } from "@/components/shared/StatCard";
 import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
 import { RouteLine } from "@/components/shared/RouteLine";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { AreaChart } from "@/components/charts/AreaChart";
+import { DonutChart } from "@/components/charts/DonutChart";
+import { RadialGauge } from "@/components/charts/RadialGauge";
+import { MiniBars } from "@/components/charts/MiniBars";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -44,6 +48,10 @@ export default async function DashboardPage() {
   const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  // Revenue trend window — first day, six months back.
+  const trendStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  const loc = region === "DE" ? "de-DE" : "en-GB";
+
   // Stats — independent queries run in parallel.
   const [
     jobsToday,
@@ -53,6 +61,10 @@ export default async function DashboardPage() {
     hotLeads,
     overdueInvoices,
     emergencyJobs,
+    paidTrend,
+    jobRows,
+    estRows,
+    leadRows,
   ] = await Promise.all([
     supabase
       .from("appointments")
@@ -97,6 +109,28 @@ export default async function DashboardPage() {
       .eq("priority", "emergency")
       .eq("status", "unscheduled")
       .limit(5),
+    supabase
+      .from("invoices")
+      .select("total_inc_vat, paid_at")
+      .eq("company_id", companyId)
+      .eq("status", "paid")
+      .gte("paid_at", trendStart.toISOString()),
+    supabase
+      .from("jobs")
+      .select("status")
+      .eq("company_id", companyId)
+      .limit(1000),
+    supabase
+      .from("estimates")
+      .select("status")
+      .eq("company_id", companyId)
+      .limit(1000),
+    supabase
+      .from("leads")
+      .select("score")
+      .eq("company_id", companyId)
+      .neq("status", "spam")
+      .limit(1000),
   ]);
 
   const outstandingTotal = (outstanding.data ?? []).reduce(
@@ -107,6 +141,70 @@ export default async function DashboardPage() {
     (sum, i) => sum + Number(i.total_inc_vat),
     0
   );
+
+  // --- Analytics ---------------------------------------------------------
+  // Revenue trend: bucket paid invoices into the last six calendar months.
+  const trend = [0, 1, 2, 3, 4, 5].map((i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+    return {
+      key: `${d.getFullYear()}-${d.getMonth()}`,
+      label: d.toLocaleDateString(loc, { month: "short" }),
+      value: 0,
+    };
+  });
+  for (const inv of paidTrend.data ?? []) {
+    if (!inv.paid_at) continue;
+    const d = new Date(inv.paid_at);
+    const bucket = trend.find((m) => m.key === `${d.getFullYear()}-${d.getMonth()}`);
+    if (bucket) bucket.value += Number(inv.total_inc_vat);
+  }
+  const trendTotal = trend.reduce((s, m) => s + m.value, 0);
+
+  // Jobs by status (donut).
+  const JOB_COLORS: Record<string, string> = {
+    completed: "hsl(var(--success))",
+    invoiced: "hsl(var(--success))",
+    in_progress: "hsl(var(--primary))",
+    en_route: "hsl(var(--primary))",
+    scheduled: "hsl(var(--warning))",
+    unscheduled: "hsl(var(--destructive))",
+    cancelled: "hsl(var(--muted-foreground))",
+  };
+  const jobCounts = new Map<string, number>();
+  for (const j of jobRows.data ?? []) {
+    jobCounts.set(j.status, (jobCounts.get(j.status) ?? 0) + 1);
+  }
+  const jobSegments = Array.from(jobCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([status, value]) => ({
+      label: status.replace(/_/g, " ").replace(/^\w/, (c: string) => c.toUpperCase()),
+      value,
+      color: JOB_COLORS[status] ?? "hsl(var(--muted-foreground))",
+    }));
+  const jobTotal = jobSegments.reduce((s, x) => s + x.value, 0);
+
+  // Estimate win rate (gauge).
+  const estCounts = new Map<string, number>();
+  for (const e of estRows.data ?? []) {
+    estCounts.set(e.status, (estCounts.get(e.status) ?? 0) + 1);
+  }
+  const accepted = estCounts.get("accepted") ?? 0;
+  const rejected = estCounts.get("rejected") ?? 0;
+  const decided = accepted + rejected;
+  const winRate = decided > 0 ? (accepted / decided) * 100 : 0;
+
+  // Leads by score (pipeline bars).
+  const scoreCounts: Record<string, number> = { hot: 0, warm: 0, cold: 0 };
+  for (const l of leadRows.data ?? []) {
+    if (l.score && l.score in scoreCounts) scoreCounts[l.score] += 1;
+  }
+  const leadRowsView = [
+    { label: "Hot", value: scoreCounts.hot, color: "hsl(var(--destructive))" },
+    { label: "Warm", value: scoreCounts.warm, color: "hsl(var(--warning))" },
+    { label: "Cold", value: scoreCounts.cold, color: "hsl(var(--muted-foreground))" },
+  ];
+  const leadTotal = scoreCounts.hot + scoreCounts.warm + scoreCounts.cold;
 
   const attention = [
     ...(hotLeads.data ?? []).map((l) => ({
@@ -189,6 +287,83 @@ export default async function DashboardPage() {
           icon={Receipt}
           tone={outstandingTotal > 0 ? "warning" : "default"}
         />
+      </div>
+
+      {/* Analytics row 1 — revenue trend + win rate */}
+      <div className="grid gap-3 lg:grid-cols-3">
+        <Card className="animate-fade-rise lg:col-span-2">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Revenue · last 6 months</CardTitle>
+            <span className="font-display text-sm font-bold text-success">
+              {formatCurrency(trendTotal, region)}
+            </span>
+          </CardHeader>
+          <CardContent>
+            {trendTotal > 0 ? (
+              <AreaChart data={trend} />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Paid invoices will chart here as money comes in.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-rise [animation-delay:80ms]">
+          <CardHeader>
+            <CardTitle className="text-base">Quote win rate</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            {decided > 0 ? (
+              <RadialGauge
+                value={winRate}
+                label={`${accepted} of ${decided} quotes won`}
+              />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Win rate appears once quotes are accepted or rejected.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Analytics row 2 — jobs breakdown + lead pipeline */}
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Card className="animate-fade-rise">
+          <CardHeader>
+            <CardTitle className="text-base">Jobs by status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {jobTotal > 0 ? (
+              <DonutChart
+                segments={jobSegments}
+                centerValue={String(jobTotal)}
+                centerLabel="jobs"
+              />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Your jobs will break down here by status.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-rise [animation-delay:80ms]">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Lead pipeline</CardTitle>
+            <span className="text-xs text-muted-foreground">{leadTotal} total</span>
+          </CardHeader>
+          <CardContent>
+            {leadTotal > 0 ? (
+              <MiniBars rows={leadRowsView} />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Leads will appear here, grouped by AI score.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="job-ticket">

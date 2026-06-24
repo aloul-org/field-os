@@ -15,10 +15,12 @@ export default async function OnboardingLayout({
   if (ctx) redirect("/dashboard");
 
   return (
-    <div className="w-full max-w-2xl">
-      <WizardProgress />
-      <div className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
-        {children}
+    <div className="flex min-h-screen items-start justify-center px-4 py-10 sm:items-center sm:py-12">
+      <div className="w-full max-w-2xl animate-slide-up-fade">
+        <WizardProgress />
+        <div className="rounded-xl border bg-card p-6 shadow-card sm:p-8">
+          {children}
+        </div>
       </div>
     </div>
   );
