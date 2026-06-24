@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export function StatCard({
   className,
 }: {
   label: string;
-  value: string | number;
+  value: ReactNode;
   icon?: LucideIcon;
   tone?: Tone;
   /** "hero" is the single larger bento stat per dashboard — see design-prompt.md. */

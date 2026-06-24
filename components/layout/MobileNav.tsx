@@ -32,7 +32,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
   const overflow = items.slice(4);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t bg-card lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t bg-card/90 backdrop-blur lg:hidden">
       {primary.map(({ key, href, icon }) => {
         const Icon = NAV_ICON_MAP[icon];
         const active = isActive(pathname, href);
@@ -42,11 +42,20 @@ export function MobileNav({ items }: { items: NavItem[] }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium",
+              "relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors",
               active ? "text-primary" : "text-muted-foreground"
             )}
           >
-            <Icon className="h-5 w-5" aria-hidden="true" />
+            {active && (
+              <span className="absolute top-1.5 h-1 w-8 rounded-full bg-primary animate-scale-in" />
+            )}
+            <Icon
+              className={cn(
+                "h-5 w-5 transition-transform duration-150",
+                active && "-translate-y-px scale-110"
+              )}
+              aria-hidden="true"
+            />
             {t(key)}
           </Link>
         );

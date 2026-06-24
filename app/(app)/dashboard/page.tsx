@@ -17,6 +17,8 @@ import { requireSection } from "@/lib/auth/session";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/shared/StatCard";
+import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { RouteLine } from "@/components/shared/RouteLine";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -144,16 +146,19 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">
-            {t(greetingKey())}, {ctx.member.name.split(" ")[0]}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {ctx.company.business_name}
-          </p>
+      <div>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight">
+              {t(greetingKey())}, {ctx.member.name.split(" ")[0]}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {ctx.company.business_name}
+            </p>
+          </div>
+          <p className="font-mono text-xs text-muted-foreground">{today}</p>
         </div>
-        <p className="font-mono text-xs text-muted-foreground">{today}</p>
+        <RouteLine className="mt-4 max-w-md" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
@@ -161,26 +166,26 @@ export default async function DashboardPage() {
           size="hero"
           className="animate-fade-rise sm:col-span-2 lg:col-span-2 lg:row-span-2"
           label={t("revenueThisMonth")}
-          value={formatCurrency(revenueTotal, region)}
+          value={<AnimatedNumber value={revenueTotal} kind="currency" region={region} />}
           icon={TrendingUp}
           tone="success"
         />
         <StatCard
           className="animate-fade-rise [animation-delay:80ms]"
           label={t("jobsToday")}
-          value={jobsToday.count ?? 0}
+          value={<AnimatedNumber value={jobsToday.count ?? 0} region={region} />}
           icon={Briefcase}
         />
         <StatCard
           className="animate-fade-rise [animation-delay:160ms]"
           label={t("estimatesPending")}
-          value={estimatesPending.count ?? 0}
+          value={<AnimatedNumber value={estimatesPending.count ?? 0} region={region} />}
           icon={FileText}
         />
         <StatCard
           className="animate-fade-rise [animation-delay:240ms] sm:col-span-2 lg:col-span-2"
           label={t("outstandingInvoices")}
-          value={formatCurrency(outstandingTotal, region)}
+          value={<AnimatedNumber value={outstandingTotal} kind="currency" region={region} />}
           icon={Receipt}
           tone={outstandingTotal > 0 ? "warning" : "default"}
         />

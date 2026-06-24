@@ -7,6 +7,8 @@ import { visibleNavItems } from "@/components/layout/nav-items";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { TopBar } from "@/components/layout/TopBar";
+import { CommandMenu } from "@/components/layout/CommandMenu";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default async function AppLayout({
   children,
@@ -42,10 +44,13 @@ export default async function AppLayout({
           unread={count ?? 0}
         />
         <main className="flex-1 px-4 pb-24 pt-6 lg:px-6 lg:pb-10">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="mx-auto w-full max-w-6xl">
+            <PageTransition>{children}</PageTransition>
+          </div>
         </main>
         <MobileNav items={items} />
       </div>
+      <CommandMenu items={items} />
     </div>
   );
 }

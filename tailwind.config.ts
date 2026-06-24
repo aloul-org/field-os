@@ -86,11 +86,55 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        // The page-enter motion — content rises along the "route line".
+        "slide-up-fade": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.96)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        // Command palette entrance.
+        "overlay-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "command-in": {
+          from: { opacity: "0", transform: "translate(-50%, -8px) scale(0.98)" },
+          to: { opacity: "1", transform: "translate(-50%, 0) scale(1)" },
+        },
+        // The signature Route Line draws itself in (uses pathLength=1).
+        "draw-line": {
+          from: { strokeDashoffset: "1" },
+          to: { strokeDashoffset: "0" },
+        },
+        // The "you are here" stop marker on the nav route line.
+        "pulse-ring": {
+          "0%": { transform: "scale(1)", opacity: "0.5" },
+          "70%, 100%": { transform: "scale(2.4)", opacity: "0" },
+        },
+        // A travelling pulse along the dashboard route line.
+        "route-travel": {
+          "0%": { offsetDistance: "0%", opacity: "0" },
+          "10%, 90%": { opacity: "1" },
+          "100%": { offsetDistance: "100%", opacity: "0" },
+        },
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-rise": "fade-rise 0.4s ease-out both",
+        "slide-up-fade": "slide-up-fade 0.5s cubic-bezier(0.16,1,0.3,1) both",
+        "scale-in": "scale-in 0.25s cubic-bezier(0.16,1,0.3,1) both",
+        "overlay-in": "overlay-in 0.2s ease-out both",
+        "command-in": "command-in 0.22s cubic-bezier(0.16,1,0.3,1) both",
+        "draw-line": "draw-line 1.1s cubic-bezier(0.16,1,0.3,1) forwards",
+        "pulse-ring": "pulse-ring 2.4s cubic-bezier(0.16,1,0.3,1) infinite",
+        shimmer: "shimmer 2s infinite",
       },
     },
   },
