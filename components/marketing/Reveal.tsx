@@ -12,10 +12,13 @@ export function Reveal({
   children,
   className,
   delay = 0,
+  from = "up",
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  /** Direction the content slides in from. */
+  from?: "up" | "left" | "right";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -43,13 +46,20 @@ export function Reveal({
     return () => io.disconnect();
   }, []);
 
+  const hidden =
+    from === "left"
+      ? "-translate-x-8 opacity-0"
+      : from === "right"
+        ? "translate-x-8 opacity-0"
+        : "translate-y-6 opacity-0";
+
   return (
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={cn(
         "transition-all duration-700 ease-out",
-        shown ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
+        shown ? "translate-x-0 translate-y-0 opacity-100" : hidden,
         className
       )}
     >

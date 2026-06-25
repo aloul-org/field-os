@@ -3,11 +3,9 @@ import {
   PhoneCall,
   Camera,
   Route,
-  Smartphone,
   CreditCard,
   LineChart,
   Sparkles,
-  Star,
   ArrowRight,
   Check,
   Flame,
@@ -24,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { RouteLine } from "@/components/shared/RouteLine";
 import { AreaChart } from "@/components/charts/AreaChart";
 import { Reveal } from "@/components/marketing/Reveal";
+import { FeatureShowcase } from "@/components/marketing/FeatureShowcase";
 import { chipColor } from "@/components/marketing/chipColors";
 import { cn } from "@/lib/utils";
 import { TRADES } from "@/lib/trades";
@@ -44,51 +43,6 @@ const LOOP = [
   { icon: HardHat, label: "Do the job" },
   { icon: CreditCard, label: "Get paid" },
   { icon: LineChart, label: "See the profit" },
-];
-
-const FEATURES = [
-  {
-    icon: PhoneCall,
-    title: "AI phone receptionist",
-    body: "Answers every call, day or night — captures the details, scores the lead and books the job while you're on the tools.",
-    span: true,
-  },
-  {
-    icon: Camera,
-    title: "Photo-to-quote estimating",
-    body: "Snap, speak or type the job. A priced, on-brand quote in minutes — with a win-probability score.",
-  },
-  {
-    icon: Route,
-    title: "Smart scheduling & routing",
-    body: "Auto-assign the right technician and optimise the day's route with live travel times.",
-  },
-  {
-    icon: Smartphone,
-    title: "Technician PWA",
-    body: "A phone-first app for the field — checklists, photos, voice reports and signatures. Works with no signal.",
-  },
-  {
-    icon: CreditCard,
-    title: "Invoicing & instant payments",
-    body: "Send a payment link, get paid by card, and reconcile automatically.",
-  },
-  {
-    icon: LineChart,
-    title: "Profit on every job",
-    body: "Real margin per job, technician, service and customer — the moment money lands.",
-    span: true,
-  },
-  {
-    icon: Sparkles,
-    title: "AI Business Coach & CFO",
-    body: "Ask plain questions about your numbers and get answers from your own data — never guesswork.",
-  },
-  {
-    icon: Star,
-    title: "Reviews & renewals",
-    body: "Turn happy jobs into 5-star reviews, and never miss a recurring maintenance renewal.",
-  },
 ];
 
 const SURFACES = [
@@ -293,42 +247,8 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* ───────────────── Feature bento ───────────────── */}
-      <section className="border-y bg-muted/20">
-        <div className="mx-auto max-w-6xl px-4 py-20">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-              Everything in one platform
-            </p>
-            <h2 className="mt-2 text-balance font-display text-3xl font-bold tracking-tight">
-              Eight tools you&apos;d otherwise stitch together
-            </h2>
-          </Reveal>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map(({ icon: Icon, title, body, span }, i) => (
-              <Reveal
-                key={title}
-                delay={(i % 3) * 80}
-                className={span ? "lg:col-span-2" : ""}
-              >
-                <div className="group h-full rounded-2xl border bg-card p-6 shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover">
-                  <span
-                    className={cn(
-                      "mb-4 grid h-11 w-11 place-items-center rounded-xl transition-transform group-hover:scale-105",
-                      chipColor(i)
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="text-lg font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ───────────────── Feature showcase (scroll deep-dive) ───────────────── */}
+      <FeatureShowcase />
 
       {/* ───────────────── Three surfaces ───────────────── */}
       <section className="mx-auto max-w-6xl px-4 py-20">
