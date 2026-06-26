@@ -7,6 +7,18 @@
  * runs without STRIPE_SECRET_KEY) rather than crashing the whole app at import.
  */
 
+export type AiProvider = "anthropic" | "openai";
+
+/**
+ * Which LLM provider powers AI features (estimating, coach/CFO, lead scoring,
+ * forecasts, copilot) — set via the AI_PROVIDER env var. Defaults to Anthropic.
+ * Both providers' SDKs ship in the app at all times so this can be flipped
+ * without a redeploy of code, just a redeploy of env vars.
+ */
+export function aiProvider(): AiProvider {
+  return process.env.AI_PROVIDER === "openai" ? "openai" : "anthropic";
+}
+
 export const publicEnv = {
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",

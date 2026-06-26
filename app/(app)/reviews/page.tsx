@@ -14,6 +14,24 @@ import { Badge } from "@/components/ui/badge";
 
 export const metadata = { title: "Reviews" };
 
+function StarRow({ rating }: { rating: number | null }) {
+  if (rating === null) return null;
+  return (
+    <span className="inline-flex shrink-0">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          className={
+            i < rating
+              ? "h-3.5 w-3.5 fill-warning text-warning"
+              : "h-3.5 w-3.5 text-muted-foreground/30"
+          }
+        />
+      ))}
+    </span>
+  );
+}
+
 export default async function ReviewsPage() {
   const ctx = await requireSection("reviews");
   const supabase = createClient();
@@ -21,7 +39,7 @@ export default async function ReviewsPage() {
   const writable = canWrite(ctx.role);
   const t = await getTranslations("reviews");
 
-  const [{ data: recentJobs }, { data: requests }, { data: customers }] =
+  const [{ data: recentJobs }, { data: requests }, { data: customers }, { data: googleReviews }] =
     await Promise.all([
       // Completed/invoiced jobs not yet asked for a review.
       supabase
@@ -42,9 +60,16 @@ export default async function ReviewsPage() {
         .select("id, name")
         .eq("company_id", ctx.company.id)
         .order("name"),
+      supabase
+        .from("google_reviews")
+        .select("id, author_name, rating, review_text, relative_time, reviewed_at")
+        .eq("company_id", ctx.company.id)
+        .order("reviewed_at", { ascending: false })
+        .limit(10),
     ]);
 
   const hasLink = Boolean(ctx.company.google_business_profile_url);
+  const hasPlaceId = Boolean(ctx.company.google_place_id);
 
   return (
     <div>
@@ -132,6 +157,48 @@ export default async function ReviewsPage() {
                     </li>
                   );
                 })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Recent Google reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!hasPlaceId ? (
+              <p className="text-sm text-muted-foreground">
+                Add your{" "}
+                <Link href="/settings" className="underline">
+                  Google Place ID in Settings
+                </Link>{" "}
+                to automatically watch for new reviews here.
+              </p>
+            ) : !googleReviews || googleReviews.length === 0 ? (
+              <EmptyState
+                icon={Star}
+                title="No reviews picked up yet"
+                description="New Google reviews appear here once the daily check finds them."
+              />
+            ) : (
+              <ul className="space-y-3">
+                {googleReviews.map((r) => (
+                  <li key={r.id} className="rounded-md border p-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-2 font-medium">
+                        {r.author_name ?? "Anonymous"}
+                        <StarRow rating={r.rating} />
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {r.relative_time ?? (r.reviewed_at ? formatDate(r.reviewed_at, region) : "")}
+                      </span>
+                    </div>
+                    {r.review_text && (
+                      <p className="mt-1 text-muted-foreground">{r.review_text}</p>
+                    )}
+                  </li>
+                ))}
               </ul>
             )}
           </CardContent>

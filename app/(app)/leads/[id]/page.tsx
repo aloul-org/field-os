@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, MapPin, Phone, PhoneCall } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { canWrite } from "@/lib/auth/roles";
 import { formatDateTime } from "@/lib/format";
-import { LEAD_STATUS_META, LEAD_SOURCE_LABEL } from "@/lib/leads/status";
+import { LEAD_STATUS_META } from "@/lib/leads/status";
 import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { LeadActions } from "@/components/leads/LeadActions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ export default async function LeadDetailPage({
   const ctx = await requireSection("leads");
   const supabase = createClient();
   const writable = canWrite(ctx.role);
+  const t = await getTranslations("leads");
+  const tStatus = await getTranslations("status");
 
   const { data: lead } = await supabase
     .from("leads")
@@ -72,32 +75,32 @@ export default async function LeadDetailPage({
         href="/leads"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to leads
+        <ArrowLeft className="h-4 w-4" /> {t("backToLeads")}
       </Link>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="font-display text-2xl font-bold tracking-tight">
-              {lead.contact_name ?? "New enquiry"}
+              {lead.contact_name ?? t("newEnquiry")}
             </h1>
             <LeadScoreBadge score={lead.score} />
-            <Badge variant={status.variant}>{status.label}</Badge>
+            <Badge variant={status.variant}>{tStatus(`lead.${lead.status}`)}</Badge>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Enquiry</CardTitle>
+              <CardTitle className="text-base">{t("enquiry")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {lead.score_reason && (
                 <p className="rounded-md bg-muted p-3 text-muted-foreground">
-                  <span className="font-medium text-foreground">Why this score: </span>
+                  <span className="font-medium text-foreground">{t("whyThisScore")} </span>
                   {lead.score_reason}
                 </p>
               )}
               <p className="whitespace-pre-wrap">
-                {lead.job_description || lead.raw_message || "No details captured yet."}
+                {lead.job_description || lead.raw_message || t("noDetailsCaptured")}
               </p>
               <dl className="grid gap-2 text-muted-foreground sm:grid-cols-2">
                 {lead.contact_phone && (
@@ -124,7 +127,7 @@ export default async function LeadDetailPage({
                 )}
               </dl>
               <p className="text-xs text-muted-foreground">
-                {LEAD_SOURCE_LABEL[lead.source]} · {formatDateTime(lead.created_at, ctx.company.region)}
+                {tStatus(`leadSource.${lead.source}`)} · {formatDateTime(lead.created_at, ctx.company.region)}
               </p>
             </CardContent>
           </Card>
@@ -132,7 +135,7 @@ export default async function LeadDetailPage({
           {calls && calls.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Call history</CardTitle>
+                <CardTitle className="text-base">{t("callHistory")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {calls.map((c) => (
@@ -145,7 +148,7 @@ export default async function LeadDetailPage({
                     <div className="min-w-0">
                       <p className="truncate">
                         <span className="font-mono">{c.caller_number}</span>
-                        {c.urgency ? ` · ${c.urgency}` : ""}
+                        {c.urgency ? ` · ${tStatus(`urgency.${c.urgency}`)}` : ""}
                       </p>
                       {c.ai_summary && (
                         <p className="line-clamp-2 text-muted-foreground">{c.ai_summary}</p>
@@ -165,7 +168,7 @@ export default async function LeadDetailPage({
           {writable ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Actions</CardTitle>
+                <CardTitle className="text-base">{t("actions")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <LeadActions
@@ -178,7 +181,7 @@ export default async function LeadDetailPage({
             </Card>
           ) : (
             <p className="text-sm text-muted-foreground">
-              You have read-only access to leads.
+              {t("readOnlyAccess")}
             </p>
           )}
         </div>

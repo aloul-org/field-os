@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { canWrite } from "@/lib/auth/roles";
 import { formatRelative } from "@/lib/format";
-import { LEAD_STATUS_META, LEAD_STATUS_TABS, LEAD_SOURCE_LABEL } from "@/lib/leads/status";
+import { LEAD_STATUS_META, LEAD_STATUS_TABS } from "@/lib/leads/status";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { JobTicketCard } from "@/components/shared/JobTicketCard";
@@ -19,7 +19,7 @@ import type { LeadStatus } from "@/lib/types/database";
 
 export const metadata = { title: "Leads" };
 
-const VALID_TABS = new Set(LEAD_STATUS_TABS.map((t) => t.key));
+const VALID_TABS = new Set(LEAD_STATUS_TABS);
 
 export default async function LeadsPage({
   searchParams,
@@ -30,6 +30,7 @@ export default async function LeadsPage({
   const supabase = createClient();
   const writable = canWrite(ctx.role);
   const t = await getTranslations("leads");
+  const tStatus = await getTranslations("status");
 
   const activeTab =
     searchParams.status && VALID_TABS.has(searchParams.status as LeadStatus)
@@ -70,12 +71,12 @@ export default async function LeadsPage({
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {LEAD_STATUS_TABS.map((tab) => {
-          const href = tab.key === "all" ? "/leads" : `/leads?status=${tab.key}`;
-          const active = activeTab === tab.key;
+        {LEAD_STATUS_TABS.map((tabKey) => {
+          const href = tabKey === "all" ? "/leads" : `/leads?status=${tabKey}`;
+          const active = activeTab === tabKey;
           return (
             <Link
-              key={tab.key}
+              key={tabKey}
               href={href}
               className={cn(
                 "rounded-pill px-3 py-1.5 text-sm font-medium transition-colors",
@@ -84,7 +85,7 @@ export default async function LeadsPage({
                   : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
-              {tab.label}
+              {tStatus(`leadTab.${tabKey}`)}
             </Link>
           );
         })}
@@ -101,7 +102,7 @@ export default async function LeadsPage({
         <div className="space-y-3">
           {leads.map((lead) => {
             const summary =
-              lead.job_description || lead.raw_message || "No details yet";
+              lead.job_description || lead.raw_message || t("noDetailsYet");
             const status = LEAD_STATUS_META[lead.status];
             const accent =
               lead.score === "hot"
@@ -119,7 +120,7 @@ export default async function LeadsPage({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="truncate font-medium">
-                        {lead.contact_name ?? "New enquiry"}
+                        {lead.contact_name ?? t("newEnquiry")}
                       </p>
                       <LeadScoreBadge score={lead.score} />
                     </div>
@@ -127,12 +128,12 @@ export default async function LeadsPage({
                       {summary}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {LEAD_SOURCE_LABEL[lead.source]} ·{" "}
+                      {tStatus(`leadSource.${lead.source}`)} ·{" "}
                       {formatRelative(lead.created_at, ctx.company.language)}
                     </p>
                   </div>
                   <Badge variant={status.variant} className="shrink-0">
-                    {status.label}
+                    {tStatus(`lead.${lead.status}`)}
                   </Badge>
                 </div>
               </JobTicketCard>

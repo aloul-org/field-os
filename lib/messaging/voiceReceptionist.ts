@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { runJsonPrompt, MODELS } from "@/lib/ai/anthropic";
+import { runJsonPrompt, MODELS } from "@/lib/ai/provider";
 import type { Urgency } from "@/lib/types/database";
 
 /**

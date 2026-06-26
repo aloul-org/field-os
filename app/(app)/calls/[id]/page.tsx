@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
@@ -26,6 +27,8 @@ export default async function CallDetailPage({
 }) {
   const ctx = await requireSection("calls");
   const supabase = createClient();
+  const t = await getTranslations("calls");
+  const tStatus = await getTranslations("status");
 
   const { data: call } = await supabase
     .from("calls")
@@ -42,7 +45,7 @@ export default async function CallDetailPage({
         href="/calls"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to calls
+        <ArrowLeft className="h-4 w-4" /> {t("backToCalls")}
       </Link>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -50,8 +53,8 @@ export default async function CallDetailPage({
           <span className="font-mono">{call.caller_number}</span>
         </h1>
         {call.urgency && (
-          <Badge variant={URGENCY_VARIANT[call.urgency] ?? "secondary"} className="capitalize">
-            {call.urgency}
+          <Badge variant={URGENCY_VARIANT[call.urgency] ?? "secondary"}>
+            {tStatus(`urgency.${call.urgency}`)}
           </Badge>
         )}
         <span className="text-sm text-muted-foreground">
@@ -64,7 +67,7 @@ export default async function CallDetailPage({
           {call.ai_summary && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Summary</CardTitle>
+                <CardTitle className="text-base">{t("summary")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{call.ai_summary}</p>
@@ -75,7 +78,7 @@ export default async function CallDetailPage({
           {call.transcript && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Transcript</CardTitle>
+                <CardTitle className="text-base">{t("transcript")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground">
@@ -88,7 +91,7 @@ export default async function CallDetailPage({
           {call.recording_url && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Recording</CardTitle>
+                <CardTitle className="text-base">{t("recording")}</CardTitle>
               </CardHeader>
               <CardContent>
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -102,7 +105,7 @@ export default async function CallDetailPage({
           {call.lead_id && (
             <Button asChild variant="outline" className="w-full">
               <Link href={`/leads/${call.lead_id}`}>
-                View lead <ArrowRight className="h-4 w-4" />
+                {t("viewLead")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -115,7 +118,7 @@ export default async function CallDetailPage({
                     : `/estimates/new?callId=${call.id}`
                 }
               >
-                Create estimate from this call
+                {t("createEstimateFromCall")}
               </Link>
             </Button>
           )}

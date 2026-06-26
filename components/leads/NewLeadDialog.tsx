@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 
 import { createLeadSchema, type CreateLeadInput } from "@/lib/validations/lead";
 import { createLead } from "@/app/(app)/leads/actions";
@@ -34,19 +35,22 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-const SOURCE_OPTIONS: { value: CreateLeadInput["source"]; label: string }[] = [
-  { value: "manual", label: "Manual entry" },
-  { value: "phone_call", label: "Phone call" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "sms", label: "SMS" },
-  { value: "email", label: "Email" },
-  { value: "facebook", label: "Facebook" },
-  { value: "instagram", label: "Instagram" },
+const SOURCE_OPTION_VALUES: CreateLeadInput["source"][] = [
+  "manual",
+  "phone_call",
+  "whatsapp",
+  "sms",
+  "email",
+  "facebook",
+  "instagram",
 ];
 
 export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations("leads");
+  const tCommon = useTranslations("common");
+  const tStatus = useTranslations("status");
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -74,7 +78,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
 
     setOpen(false);
     form.reset();
-    toast({ description: "Lead added — we're scoring it now." });
+    toast({ description: t("leadAdded") });
     if (result.data) router.push(`/leads/${result.data.id}`);
   }
 
@@ -83,7 +87,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a lead</DialogTitle>
+          <DialogTitle>{t("addLeadTitle")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -92,7 +96,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
               name="contact_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("nameLabel")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -106,7 +110,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
                 name="contact_phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t("phoneLabel")}</FormLabel>
                     <FormControl>
                       <Input type="tel" {...field} />
                     </FormControl>
@@ -119,7 +123,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
                 name="contact_email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("emailLabel")}</FormLabel>
                     <FormControl>
                       <Input type="email" {...field} />
                     </FormControl>
@@ -133,7 +137,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
               name="source"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Source</FormLabel>
+                  <FormLabel>{t("sourceLabel")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -141,9 +145,9 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SOURCE_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>
-                          {o.label}
+                      {SOURCE_OPTION_VALUES.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {tStatus(`leadSource.${value}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -157,7 +161,7 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>{t("addressLabel")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -170,11 +174,11 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
               name="job_description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What do they need?</FormLabel>
+                  <FormLabel>{t("whatDoTheyNeed")}</FormLabel>
                   <FormControl>
                     <Textarea
                       rows={3}
-                      placeholder="e.g. Boiler making a banging noise, no hot water since this morning"
+                      placeholder={t("jobDescriptionPlaceholder")}
                       {...field}
                     />
                   </FormControl>
@@ -188,10 +192,10 @@ export function NewLeadDialog({ trigger }: { trigger: React.ReactNode }) {
                 variant="outline"
                 onClick={() => setOpen(false)}
               >
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Saving…" : "Add lead"}
+                {submitting ? tCommon("saving") : t("addLead")}
               </Button>
             </div>
           </form>

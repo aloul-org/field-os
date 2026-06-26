@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { getRouteContext } from "@/lib/auth/session";
 import { ok, err, unauthorized, forbidden, parseBody } from "@/lib/api/response";
-import { runTextPrompt } from "@/lib/ai/anthropic";
+import { runTextPrompt } from "@/lib/ai/provider";
 
 export const runtime = "nodejs";
 

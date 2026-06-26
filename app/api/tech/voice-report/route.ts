@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getRouteContext } from "@/lib/auth/session";
 import { ok, err, unauthorized, forbidden } from "@/lib/api/response";
 import { transcribeAudio } from "@/lib/ai/whisper";
-import { runTextPrompt, MODELS } from "@/lib/ai/anthropic";
+import { runTextPrompt, MODELS } from "@/lib/ai/provider";
 
 export const runtime = "nodejs";
 

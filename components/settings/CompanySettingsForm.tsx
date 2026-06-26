@@ -71,6 +71,8 @@ export function CompanySettingsForm({
       payment_terms_days: company.payment_terms_days ?? 14,
       monthly_overhead: company.monthly_overhead ?? undefined,
       language: company.language,
+      google_business_profile_url: company.google_business_profile_url ?? "",
+      google_place_id: company.google_place_id ?? "",
     },
   });
 
@@ -304,6 +306,66 @@ export function CompanySettingsForm({
                       onBlur={field.onBlur}
                       value={field.value ?? ""}
                       {...numberFieldHandlers(field)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Google reviews</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="google_business_profile_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Google review link</FormLabel>
+                  <FormDescription>
+                    The short link customers tap to leave a review — get it from
+                    your Google Business Profile under &quot;Ask for reviews&quot;.
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="https://g.page/r/..."
+                      disabled={readOnly}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="google_place_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Google Place ID</FormLabel>
+                  <FormDescription>
+                    Lets FieldOS watch for new Google reviews automatically. Look
+                    your business up in the{" "}
+                    <a
+                      href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Place ID finder
+                    </a>{" "}
+                    and paste the ID here.
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      placeholder="ChIJ..."
+                      disabled={readOnly}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

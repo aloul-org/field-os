@@ -136,6 +136,7 @@ export type CompanyRow = {
   subscription_status: SubscriptionStatus;
   trial_ends_at: string | null;
   google_business_profile_url: string | null;
+  google_place_id: string | null;
   twilio_voice_number: string | null;
   voice_receptionist_enabled: boolean;
   voice_greeting: string | null;
@@ -463,6 +464,18 @@ export type ReviewRequestRow = {
   status: string;
 }
 
+export type GoogleReviewRow = {
+  id: string;
+  company_id: string;
+  google_review_id: string;
+  author_name: string | null;
+  rating: number | null;
+  review_text: string | null;
+  relative_time: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
 export type PricingNudgeRow = {
   id: string;
   company_id: string;
@@ -616,6 +629,11 @@ export interface Database {
         ReviewRequestRow,
         InsertOf<ReviewRequestRow>,
         UpdateOf<ReviewRequestRow>
+      >;
+      google_reviews: TableShape<
+        GoogleReviewRow,
+        InsertOf<GoogleReviewRow>,
+        UpdateOf<GoogleReviewRow>
       >;
       pricing_nudges: TableShape<
         PricingNudgeRow,

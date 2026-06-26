@@ -13,6 +13,8 @@ export const companySettingsSchema = z.object({
   payment_terms_days: z.number().int().min(0).max(120),
   monthly_overhead: z.number().min(0).optional(),
   language: z.enum(["en", "de"]),
+  google_business_profile_url: z.string().optional(),
+  google_place_id: z.string().optional(),
 });
 
 export type CompanySettingsInput = z.infer<typeof companySettingsSchema>;

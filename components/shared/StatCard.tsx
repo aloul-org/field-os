@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 
 const ICON_WRAP_TONE_CLASS = {
-  default: "bg-muted text-muted-foreground",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  destructive: "bg-destructive/10 text-destructive",
+  default: "bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary ring-1 ring-inset ring-primary/15",
+  success: "bg-gradient-to-br from-success/25 via-success/10 to-transparent text-success ring-1 ring-inset ring-success/15",
+  warning: "bg-gradient-to-br from-warning/25 via-warning/10 to-transparent text-warning ring-1 ring-inset ring-warning/15",
+  destructive: "bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent text-destructive ring-1 ring-inset ring-destructive/15",
 };
 
 const HERO_WASH_TONE_CLASS = {
@@ -57,11 +57,11 @@ export function StatCard({
             {Icon && (
               <span
                 className={cn(
-                  "grid h-11 w-11 shrink-0 place-items-center rounded-full ring-1 ring-inset ring-black/5",
+                  "grid h-12 w-12 shrink-0 place-items-center rounded-2xl shadow-sm",
                   ICON_WRAP_TONE_CLASS[tone]
                 )}
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
+                <Icon className="h-5 w-5 drop-shadow-sm" aria-hidden="true" strokeWidth={2.25} />
               </span>
             )}
           </div>
@@ -79,11 +79,11 @@ export function StatCard({
         {Icon && (
           <span
             className={cn(
-              "grid h-10 w-10 shrink-0 place-items-center rounded-full",
+              "grid h-10 w-10 shrink-0 place-items-center rounded-xl shadow-sm",
               ICON_WRAP_TONE_CLASS[tone]
             )}
           >
-            <Icon className="h-4 w-4" aria-hidden="true" />
+            <Icon className="h-[18px] w-[18px]" aria-hidden="true" strokeWidth={2.25} />
           </span>
         )}
         <div className="min-w-0 space-y-1">

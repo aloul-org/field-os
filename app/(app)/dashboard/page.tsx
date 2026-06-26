@@ -200,9 +200,9 @@ export default async function DashboardPage() {
     if (l.score && l.score in scoreCounts) scoreCounts[l.score] += 1;
   }
   const leadRowsView = [
-    { label: "Hot", value: scoreCounts.hot, color: "hsl(var(--destructive))" },
-    { label: "Warm", value: scoreCounts.warm, color: "hsl(var(--warning))" },
-    { label: "Cold", value: scoreCounts.cold, color: "hsl(var(--muted-foreground))" },
+    { label: t("leadScoreHot"), value: scoreCounts.hot, color: "hsl(var(--destructive))" },
+    { label: t("leadScoreWarm"), value: scoreCounts.warm, color: "hsl(var(--warning))" },
+    { label: t("leadScoreCold"), value: scoreCounts.cold, color: "hsl(var(--muted-foreground))" },
   ];
   const leadTotal = scoreCounts.hot + scoreCounts.warm + scoreCounts.cold;
 
@@ -211,16 +211,16 @@ export default async function DashboardPage() {
       key: `lead-${l.id}`,
       icon: Flame,
       tone: "destructive" as const,
-      label: "Hot lead",
+      label: t("attentionHotLead"),
       code: null as string | null,
-      detail: l.contact_name ?? "New enquiry",
+      detail: l.contact_name ?? t("attentionNewEnquiry"),
       href: `/leads/${l.id}`,
     })),
     ...(emergencyJobs.data ?? []).map((j) => ({
       key: `job-${j.id}`,
       icon: Siren,
       tone: "destructive" as const,
-      label: "Emergency — unscheduled",
+      label: t("attentionEmergencyUnscheduled"),
       code: j.job_number as string | null,
       detail: j.title,
       href: `/jobs/${j.id}`,
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
       key: `inv-${i.id}`,
       icon: AlertTriangle,
       tone: "warning" as const,
-      label: "Overdue invoice",
+      label: t("attentionOverdueInvoice"),
       code: i.invoice_number as string | null,
       detail: formatCurrency(Number(i.total_inc_vat), region),
       href: `/invoices/${i.id}`,
@@ -293,7 +293,7 @@ export default async function DashboardPage() {
       <div className="grid gap-3 lg:grid-cols-3">
         <Card className="animate-fade-rise lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Revenue · last 6 months</CardTitle>
+            <CardTitle className="text-base">{t("revenueTrendTitle")}</CardTitle>
             <span className="font-display text-sm font-bold text-success">
               {formatCurrency(trendTotal, region)}
             </span>
@@ -303,7 +303,7 @@ export default async function DashboardPage() {
               <AreaChart data={trend} />
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Paid invoices will chart here as money comes in.
+                {t("revenueTrendEmpty")}
               </p>
             )}
           </CardContent>
@@ -311,17 +311,17 @@ export default async function DashboardPage() {
 
         <Card className="animate-fade-rise [animation-delay:80ms]">
           <CardHeader>
-            <CardTitle className="text-base">Quote win rate</CardTitle>
+            <CardTitle className="text-base">{t("winRateTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center">
             {decided > 0 ? (
               <RadialGauge
                 value={winRate}
-                label={`${accepted} of ${decided} quotes won`}
+                label={t("winRateLabel", { accepted, decided })}
               />
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Win rate appears once quotes are accepted or rejected.
+                {t("winRateEmpty")}
               </p>
             )}
           </CardContent>
@@ -332,18 +332,18 @@ export default async function DashboardPage() {
       <div className="grid gap-3 lg:grid-cols-2">
         <Card className="animate-fade-rise">
           <CardHeader>
-            <CardTitle className="text-base">Jobs by status</CardTitle>
+            <CardTitle className="text-base">{t("jobsByStatusTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             {jobTotal > 0 ? (
               <DonutChart
                 segments={jobSegments}
                 centerValue={String(jobTotal)}
-                centerLabel="jobs"
+                centerLabel={t("jobsCenterLabel")}
               />
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Your jobs will break down here by status.
+                {t("jobsByStatusEmpty")}
               </p>
             )}
           </CardContent>
@@ -351,15 +351,17 @@ export default async function DashboardPage() {
 
         <Card className="animate-fade-rise [animation-delay:80ms]">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Lead pipeline</CardTitle>
-            <span className="text-xs text-muted-foreground">{leadTotal} total</span>
+            <CardTitle className="text-base">{t("leadPipelineTitle")}</CardTitle>
+            <span className="text-xs text-muted-foreground">
+              {t("leadPipelineTotal", { count: leadTotal })}
+            </span>
           </CardHeader>
           <CardContent>
             {leadTotal > 0 ? (
               <MiniBars rows={leadRowsView} />
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Leads will appear here, grouped by AI score.
+                {t("leadPipelineEmpty")}
               </p>
             )}
           </CardContent>
@@ -390,13 +392,13 @@ export default async function DashboardPage() {
                   >
                     <span
                       className={cn(
-                        "grid h-9 w-9 shrink-0 place-items-center rounded-full",
+                        "grid h-10 w-10 shrink-0 place-items-center rounded-xl shadow-sm",
                         tone === "destructive"
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-warning/10 text-warning"
+                          ? "bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent text-destructive ring-1 ring-inset ring-destructive/15"
+                          : "bg-gradient-to-br from-warning/25 via-warning/10 to-transparent text-warning ring-1 ring-inset ring-warning/15"
                       )}
                     >
-                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      <Icon className="h-[18px] w-[18px]" aria-hidden="true" strokeWidth={2.25} />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium text-foreground">

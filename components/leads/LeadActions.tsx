@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, UserPlus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { updateLeadStatus, assignLead } from "@/app/(app)/leads/actions";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,8 @@ export function LeadActions({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations("leads");
+  const tCommon = useTranslations("common");
   const [busy, setBusy] = useState(false);
   const [lostOpen, setLostOpen] = useState(false);
   const [lostReason, setLostReason] = useState("");
@@ -70,7 +73,7 @@ export function LeadActions({
       toast({ variant: "destructive", description: result.error });
       return;
     }
-    toast({ description: assigned_to ? "Lead assigned." : "Lead unassigned." });
+    toast({ description: assigned_to ? t("leadAssigned") : t("leadUnassigned") });
     router.refresh();
   }
 
@@ -79,7 +82,7 @@ export function LeadActions({
       {/* Primary next action — exactly one per the design system. */}
       {!done && (
         <Button asChild className="w-full">
-          <a href={`/estimates/new?leadId=${leadId}`}>Create estimate</a>
+          <a href={`/estimates/new?leadId=${leadId}`}>{t("createEstimate")}</a>
         </Button>
       )}
 
@@ -90,7 +93,7 @@ export function LeadActions({
             disabled={busy}
             onClick={() => setStatus("contacted")}
           >
-            <Check className="h-4 w-4" /> Mark contacted
+            <Check className="h-4 w-4" /> {t("markContacted")}
           </Button>
         )}
         {!done && (
@@ -99,7 +102,7 @@ export function LeadActions({
             disabled={busy}
             onClick={() => setLostOpen(true)}
           >
-            <X className="h-4 w-4" /> Mark lost
+            <X className="h-4 w-4" /> {t("markLost")}
           </Button>
         )}
       </div>
@@ -107,7 +110,7 @@ export function LeadActions({
       {/* Assignment — suggested techs (skills match) float to the top. */}
       <div className="space-y-1.5">
         <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-          <UserPlus className="h-3.5 w-3.5" /> Assigned to
+          <UserPlus className="h-3.5 w-3.5" /> {t("assignedTo")}
         </label>
         <Select
           value={assignedTo ?? "unassigned"}
@@ -115,14 +118,14 @@ export function LeadActions({
           disabled={busy}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Unassigned" />
+            <SelectValue placeholder={t("unassigned")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="unassigned">Unassigned</SelectItem>
+            <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
             {team.map((m) => (
               <SelectItem key={m.id} value={m.id}>
                 {m.name}
-                {m.suggested ? " · suggested" : ""}
+                {m.suggested ? ` · ${t("suggested")}` : ""}
               </SelectItem>
             ))}
           </SelectContent>
@@ -132,24 +135,24 @@ export function LeadActions({
       <Dialog open={lostOpen} onOpenChange={setLostOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark this lead as lost</DialogTitle>
+            <DialogTitle>{t("markLostTitle")}</DialogTitle>
           </DialogHeader>
           <Textarea
             rows={3}
             value={lostReason}
             onChange={(e) => setLostReason(e.target.value)}
-            placeholder="Why was it lost? e.g. went with a cheaper quote, no longer needed"
+            placeholder={t("lostReasonPlaceholder")}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setLostOpen(false)}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               variant="destructive"
               disabled={busy || !lostReason.trim()}
               onClick={() => setStatus("lost", lostReason)}
             >
-              Mark lost
+              {t("markLost")}
             </Button>
           </DialogFooter>
         </DialogContent>

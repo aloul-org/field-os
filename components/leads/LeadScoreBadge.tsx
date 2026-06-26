@@ -1,37 +1,33 @@
 import { Flame, ThermometerSun, Snowflake } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { cn } from "@/lib/utils";
 import type { LeadScore } from "@/lib/types/database";
 
-const SCORE_META: Record<
-  LeadScore,
-  { label: string; icon: typeof Flame; className: string }
-> = {
+const SCORE_META: Record<LeadScore, { icon: typeof Flame; className: string }> = {
   hot: {
-    label: "Hot",
     icon: Flame,
     className: "bg-destructive/10 text-destructive",
   },
   warm: {
-    label: "Warm",
     icon: ThermometerSun,
     className: "bg-warning/15 text-warning",
   },
   cold: {
-    label: "Cold",
     icon: Snowflake,
     className: "bg-muted text-muted-foreground",
   },
 };
 
 /** Calm pill (tint background, not full-saturation) per the design system. */
-export function LeadScoreBadge({
+export async function LeadScoreBadge({
   score,
   className,
 }: {
   score: LeadScore | null;
   className?: string;
 }) {
+  const t = await getTranslations("leads");
   if (!score) {
     return (
       <span
@@ -40,12 +36,14 @@ export function LeadScoreBadge({
           className
         )}
       >
-        Scoring…
+        {t("scoring")}
       </span>
     );
   }
   const meta = SCORE_META[score];
   const Icon = meta.icon;
+  const labelKey =
+    score === "hot" ? "scoreHot" : score === "warm" ? "scoreWarm" : "scoreCold";
   return (
     <span
       className={cn(
@@ -55,7 +53,7 @@ export function LeadScoreBadge({
       )}
     >
       <Icon className="h-3 w-3" aria-hidden="true" />
-      {meta.label}
+      {t(labelKey)}
     </span>
   );
 }

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FieldOS AI — Running Cost Report</title>
+<style>
+  :root{
+    --teal:#0f766e; --teal-d:#0b5c55; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f8fafc; --card:#ffffff; --code:#0b1220; --code-ink:#e2e8f0;
+    --warn-bg:#fffbeb; --warn-line:#f59e0b; --ok-bg:#ecfdf5; --ok-line:#10b981;
+    --info-bg:#eff6ff; --info-line:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:48px 24px}
+  header .wrap{max-width:960px;margin:0 auto}
+  header .logo{display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:20px}
+  header .logo .badge{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:18px}
+  header h1{margin:18px 0 6px;font-size:32px;letter-spacing:-.02em}
+  header p{margin:0;opacity:.9;max-width:64ch}
+  .layout{max-width:960px;margin:0 auto;padding:0 24px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:28px 0}
+  nav.toc h2{margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  nav.toc a{color:var(--teal);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin:0 0 22px}
+  section h2{margin:0 0 4px;font-size:22px;letter-spacing:-.01em}
+  section h2 .step{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--teal);color:#fff;font-size:15px;margin-right:10px;vertical-align:middle}
+  section h3{margin:24px 0 8px;font-size:16px}
+  p,li{color:#1e293b}
+  code{background:#eef2f7;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  td code{font-size:.85em}
+  tr.total td{border-top:2px solid var(--ink);font-weight:700;background:var(--bg)}
+  .note{border-radius:10px;padding:12px 16px;margin:14px 0;border-left:4px solid}
+  .note.info{background:var(--info-bg);border-color:var(--info-line)}
+  .note.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+  .note.ok{background:var(--ok-bg);border-color:var(--ok-line)}
+  .note strong{display:block;margin-bottom:2px}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e2e8f0;color:#334155;vertical-align:middle}
+  .pill.ai{background:#ede9fe;color:#6d28d9}
+  .pill.infra{background:#ccfbf1;color:#0f766e}
+  .pill.usage{background:#fef3c7;color:#92400e}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}nav.toc ol{columns:1}}
+  .kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .kpi .v{font-size:26px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:2px}
+  footer{max-width:960px;margin:10px auto 60px;padding:0 24px;color:var(--muted);font-size:13px}
+  a{color:var(--teal)}
+  .src{font-size:13px;color:var(--muted)}
+  .src a{word-break:break-word}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo"><span class="badge">F</span> FieldOS AI</div>
+    <h1>Running Cost Report</h1>
+    <p>What it actually costs to operate FieldOS AI, feature by feature — AI token spend, third-party infrastructure, and per-customer monthly totals under three real usage profiles. All figures use current published list prices (June 2026) and the exact models, token budgets and call patterns wired into this codebase.</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#how">How to read this</a></li>
+      <li><a href="#unit-rates">Provider unit rates</a></li>
+      <li><a href="#ai-features">AI cost per feature</a></li>
+      <li><a href="#infra">Infrastructure &amp; usage</a></li>
+      <li><a href="#scenarios">Per-customer monthly totals</a></li>
+      <li><a href="#provider">Anthropic vs OpenAI</a></li>
+      <li><a href="#stripe">The Stripe caveat</a></li>
+      <li><a href="#levers">Cost levers</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <div class="note warn">
+    <strong>Read me first — these are modelled estimates, not invoices</strong>
+    Token counts are derived from the real system prompts, <code>maxTokens</code> budgets and call flows in this repo (e.g. <code>lib/ai/estimateEngine.ts</code>, <code>lib/ai/businessCoach.ts</code>), but actual usage varies with prompt length and how much the model writes. Prices are public list rates as of June 2026 and change often. Use this to understand the <em>shape</em> of the cost, then confirm against your own first month's bills.
+  </div>
+
+  <section id="how">
+    <h2><span class="step">1</span>How to read this</h2>
+    <p>FieldOS AI is a multi-tenant SaaS, so cost falls into three buckets:</p>
+    <ul>
+      <li><span class="pill ai">AI</span> <strong>Per-operation</strong> — pay-per-token LLM and transcription calls. Scales directly with how much each customer uses the AI features.</li>
+      <li><span class="pill infra">Platform</span> <strong>Fixed monthly</strong> — Supabase + Vercel + email, paid once for the whole platform regardless of tenant count (until you outgrow a tier).</li>
+      <li><span class="pill usage">Usage</span> <strong>Metered third-party</strong> — Twilio voice/SMS/WhatsApp and Google Maps, billed per minute/message/request and attributable to individual tenants.</li>
+    </ul>
+    <p>The AI layer is provider-switchable (<code>AI_PROVIDER=anthropic|openai</code>), so every AI line shows both. The app splits work across a <strong>live</strong> model (user-facing: estimating, copilot, Coach) and a cheaper <strong>background</strong> model (high-volume: lead scoring, forecasts, summaries) — see <code>lib/ai/anthropic.ts</code> / <code>lib/ai/openai.ts</code>.</p>
+  </section>
+
+  <section id="unit-rates">
+    <h2><span class="step">2</span>Provider unit rates</h2>
+    <h3>LLM token prices (per 1M tokens)</h3>
+    <table>
+      <thead><tr><th>Role</th><th>Model</th><th class="num">Input</th><th class="num">Output</th></tr></thead>
+      <tbody>
+        <tr><td>Live (Anthropic)</td><td><code>claude-sonnet-4-6</code></td><td class="num">$3.00</td><td class="num">$15.00</td></tr>
+        <tr><td>Background (Anthropic)</td><td><code>claude-haiku-4-5</code></td><td class="num">$1.00</td><td class="num">$5.00</td></tr>
+        <tr><td>Live (OpenAI)</td><td><code>gpt-5.5</code></td><td class="num">$5.00</td><td class="num">$30.00</td></tr>
+        <tr><td>Background (OpenAI)</td><td><code>gpt-5.4-mini</code> *</td><td class="num">~$0.40</td><td class="num">~$1.60</td></tr>
+        <tr><td>Transcription</td><td><code>whisper-1</code> (OpenAI)</td><td class="num" colspan="2">$0.006 / minute of audio</td></tr>
+      </tbody>
+    </table>
+    <p class="src">* OpenAI did not publish a <code>gpt-5.4-mini</code> list price at time of writing; this is an estimate interpolated between <code>gpt-5.4</code> ($2.50/$15) and <code>gpt-5.4-nano</code> ($0.20/$1.25). Treat OpenAI background costs as approximate. Whisper transcription always runs on OpenAI regardless of the provider switch.</p>
+
+    <h3>Metered services</h3>
+    <table>
+      <thead><tr><th>Service</th><th>Unit</th><th class="num">Rate</th></tr></thead>
+      <tbody>
+        <tr><td>Twilio local number</td><td>per number / month</td><td class="num">$1.15</td></tr>
+        <tr><td>Twilio inbound voice</td><td>per minute</td><td class="num">$0.0085</td></tr>
+        <tr><td>Twilio speech recognition (Gather)</td><td>per minute (≈$0.01/15s)</td><td class="num">~$0.04</td></tr>
+        <tr><td>Twilio SMS (US)</td><td>per message + carrier fees</td><td class="num">$0.0083+</td></tr>
+        <tr><td>Twilio WhatsApp</td><td>per msg + Meta template fee</td><td class="num">$0.005+</td></tr>
+        <tr><td>Google Distance Matrix / Routes</td><td>per 1,000 elements</td><td class="num">$2.04–$5.00</td></tr>
+        <tr><td>Google Places Details (incl. reviews field)</td><td>per 1,000 calls (Enterprise SKU)</td><td class="num">~$20–25</td></tr>
+        <tr><td>Mapbox map loads</td><td>per 1,000 (first 50k/mo free)</td><td class="num">$5.00</td></tr>
+        <tr><td>Stripe payment</td><td>per successful charge</td><td class="num">2.9% + $0.30</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="ai-features">
+    <h2><span class="step">3</span>AI cost per feature</h2>
+    <p>Cost of a <strong>single</strong> AI operation, using the prompts and token budgets in this repo. "Tokens (in→out)" are typical, not worst-case.</p>
+    <table>
+      <thead><tr><th>Feature</th><th>Code</th><th>Model role</th><th class="num">Tokens (in→out)</th><th class="num">Anthropic</th><th class="num">OpenAI</th></tr></thead>
+      <tbody>
+        <tr><td>Estimate from text/voice</td><td><code>estimateEngine.extractEstimate</code></td><td>Live</td><td class="num">1,200 → 600</td><td class="num">$0.013</td><td class="num">$0.024</td></tr>
+        <tr><td>Estimate from photo (＋vision)</td><td><code>extractEstimate</code> w/ images</td><td>Live</td><td class="num">＋~1,600/img</td><td class="num">＋$0.005</td><td class="num">＋$0.008</td></tr>
+        <tr><td>Quote win-probability</td><td><code>scoreWinProbability</code></td><td>Background</td><td class="num">300 → 150</td><td class="num">$0.0011</td><td class="num">~$0.0003</td></tr>
+        <tr><td>Lead scoring (hot/warm/cold)</td><td><code>leadScoring.scoreLead</code></td><td>Background</td><td class="num">1,100 → 80</td><td class="num">$0.0015</td><td class="num">~$0.0006</td></tr>
+        <tr><td>Voice receptionist call summary</td><td><code>voiceReceptionist.summariseCall</code></td><td>Background</td><td class="num">250 → 150</td><td class="num">$0.001</td><td class="num">~$0.0003</td></tr>
+        <tr><td>Technician voice report format</td><td><code>tech/voice-report</code></td><td>Background</td><td class="num">500 → 300</td><td class="num">$0.002</td><td class="num">~$0.0007</td></tr>
+        <tr><td>＋ Whisper transcription (2-min report)</td><td><code>ai/whisper</code></td><td>—</td><td class="num">2 min</td><td class="num" colspan="2">$0.012 (OpenAI, both modes)</td></tr>
+        <tr><td>Revenue forecast narrative</td><td><code>finance/forecast</code></td><td>Background</td><td class="num">200 → 120</td><td class="num">$0.0008</td><td class="num">~$0.0003</td></tr>
+        <tr><td>Materials forecast narrative</td><td><code>materials/forecast</code></td><td>Background</td><td class="num">300 → 200</td><td class="num">$0.0013</td><td class="num">~$0.0004</td></tr>
+        <tr><td>Technician AI copilot answer</td><td><code>tech/copilot</code></td><td>Live</td><td class="num">800 → 500</td><td class="num">$0.010</td><td class="num">$0.019</td></tr>
+        <tr><td>AI Coach / CFO turn (tool-calling)</td><td><code>businessCoach.runCoachTurn</code></td><td>Live ×N</td><td class="num">~6,000 → 2,000</td><td class="num">$0.048</td><td class="num">$0.090</td></tr>
+      </tbody>
+    </table>
+    <div class="note info">
+      <strong>The AI Coach is the priciest single action.</strong> It loops up to 5 rounds (<code>MAX_TOOL_ROUNDS</code>), re-sending accumulating tool results each round on the live model, so one conversation turn can cost 3–10× a normal estimate. It's also the lowest-frequency feature, so it rarely dominates a monthly bill — but it's the one to watch if usage spikes.
+    </div>
+  </section>
+
+  <section id="infra">
+    <h2><span class="step">4</span>Infrastructure &amp; usage</h2>
+    <h3>Fixed platform cost (whole app, not per tenant)</h3>
+    <table>
+      <thead><tr><th>Service</th><th>Plan</th><th>Covers</th><th class="num">Monthly</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase</td><td>Pro</td><td>Postgres + Auth + Storage + Realtime; 8 GB DB, ~100k MAU included</td><td class="num">$25</td></tr>
+        <tr><td>Vercel</td><td>Pro</td><td>Hosting, serverless/edge functions, 1 TB bandwidth; per seat</td><td class="num">$20</td></tr>
+        <tr><td>Resend</td><td>Free → Pro</td><td>Quote/invoice/team emails; 3k/mo free, then $20</td><td class="num">$0–20</td></tr>
+        <tr class="total"><td colspan="3">Platform baseline</td><td class="num">$45–65</td></tr>
+      </tbody>
+    </table>
+    <p class="src">These tiers comfortably host many tenants. You only step up (Supabase compute add-ons, Vercel bandwidth/function overages at $0.15/GB &amp; $0.60/M invocations) once the whole platform — not one customer — outgrows the included allowances.</p>
+
+    <h3>Per-tenant metered services</h3>
+    <ul>
+      <li><strong>Voice receptionist</strong> is the heaviest metered feature: each inbound call ≈ voice minutes ($0.0085/min) ＋ speech recognition (~$0.04/min). A 3-minute call ≈ <strong>$0.15</strong>, before the AI summary.</li>
+      <li><strong>Phone number</strong>: $1.15/month per tenant that provisions one.</li>
+      <li><strong>SMS / WhatsApp</strong> lead capture &amp; renewals: roughly $0.01–0.05 per message all-in (carrier/Meta fees included).</li>
+      <li><strong>Google Maps</strong>: auto-scheduling travel times &amp; route optimisation; plus the new daily <strong>review poll</strong> (<code>/api/cron/review-poll</code>) which calls Places Details once per tenant per day — ~30 calls/tenant/month. The reviews field sits on Google's pricier Places SKU (~$20–25/1k), but at one call/day a tenant is well inside the 1,000/mo free Enterprise allowance unless you have 30+ active tenants.</li>
+      <li><strong>Mapbox</strong>: map rendering; 50k free loads/mo covers everything but high-traffic deployments.</li>
+    </ul>
+  </section>
+
+  <section id="scenarios">
+    <h2><span class="step">5</span>Per-customer monthly totals</h2>
+    <p>Blended cost to serve <strong>one</strong> tenant for a month (AI figures use Anthropic; platform baseline excluded since it's shared). Stripe fees are excluded here — see §7.</p>
+
+    <div class="grid2" style="margin:18px 0">
+      <div class="kpi"><div class="v">~$6</div><div class="l">Solo / light</div></div>
+      <div class="kpi"><div class="v">~$55</div><div class="l">Growing / 5 staff</div></div>
+    </div>
+
+    <h3>A · Solo tradesperson (light)</h3>
+    <table>
+      <thead><tr><th>Activity</th><th class="num">Volume/mo</th><th class="num">Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Lead scoring</td><td class="num">40</td><td class="num">$0.06</td></tr>
+        <tr><td>Text estimates</td><td class="num">25</td><td class="num">$0.33</td></tr>
+        <tr><td>Win-probability</td><td class="num">15</td><td class="num">$0.02</td></tr>
+        <tr><td>Copilot queries</td><td class="num">15</td><td class="num">$0.15</td></tr>
+        <tr><td>AI Coach turns</td><td class="num">10</td><td class="num">$0.48</td></tr>
+        <tr><td>Voice reports ＋ Whisper</td><td class="num">5</td><td class="num">$0.07</td></tr>
+        <tr><td>Forecasts</td><td class="num">~30</td><td class="num">$0.04</td></tr>
+        <tr><td>Twilio number ＋ light SMS</td><td class="num">—</td><td class="num">$4.50</td></tr>
+        <tr class="total"><td>Per tenant</td><td class="num"></td><td class="num">~$5.65</td></tr>
+      </tbody>
+    </table>
+
+    <h3>B · Growing business (5 staff, receptionist on)</h3>
+    <table>
+      <thead><tr><th>Activity</th><th class="num">Volume/mo</th><th class="num">Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Lead scoring</td><td class="num">250</td><td class="num">$0.38</td></tr>
+        <tr><td>Estimates (incl. 30 photo)</td><td class="num">150</td><td class="num">$2.10</td></tr>
+        <tr><td>Win-probability</td><td class="num">90</td><td class="num">$0.10</td></tr>
+        <tr><td>Copilot queries</td><td class="num">100</td><td class="num">$1.00</td></tr>
+        <tr><td>AI Coach turns</td><td class="num">50</td><td class="num">$2.40</td></tr>
+        <tr><td>Voice reports ＋ Whisper</td><td class="num">40</td><td class="num">$0.56</td></tr>
+        <tr><td>Forecasts ＋ summaries</td><td class="num">~120</td><td class="num">$0.30</td></tr>
+        <tr><td>Voice receptionist (200 calls × 3 min)</td><td class="num">600 min</td><td class="num">$29.00</td></tr>
+        <tr><td>Twilio numbers, SMS &amp; WhatsApp</td><td class="num">—</td><td class="num">$18.00</td></tr>
+        <tr><td>Google Maps (scheduling ＋ review poll)</td><td class="num">—</td><td class="num">$2.00</td></tr>
+        <tr class="total"><td>Per tenant</td><td class="num"></td><td class="num">~$55.30</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note ok">
+      <strong>Takeaway:</strong> AI is cheap — even the busy tenant spends only ~$7/mo on tokens. The real variable cost is the <strong>voice receptionist</strong> (Twilio voice ＋ speech), which alone is ~half a heavy tenant's bill. Tenants who don't enable phone features cost almost nothing beyond their share of the $45–65 platform baseline.
+    </div>
+  </section>
+
+  <section id="provider">
+    <h2><span class="step">6</span>Anthropic vs OpenAI</h2>
+    <p>Flipping <code>AI_PROVIDER</code> changes only the LLM lines (Whisper stays on OpenAI either way). On the live-model features OpenAI's <code>gpt-5.5</code> runs roughly <strong>1.8–2×</strong> the cost of <code>claude-sonnet-4-6</code> at current list prices; on background features the comparison is noisier because OpenAI's mini tier price is estimated.</p>
+    <table>
+      <thead><tr><th>Monthly AI spend (tokens only)</th><th class="num">Anthropic</th><th class="num">OpenAI *</th></tr></thead>
+      <tbody>
+        <tr><td>Solo / light</td><td class="num">~$1.15</td><td class="num">~$2.00</td></tr>
+        <tr><td>Growing / 5 staff</td><td class="num">~$6.80</td><td class="num">~$12.50</td></tr>
+      </tbody>
+    </table>
+    <p class="src">* OpenAI background-model figures depend on the estimated <code>gpt-5.4-mini</code> rate. The gap is dominated by the live model in both cases. Recommendation: keep Anthropic as the default (it is in <code>lib/env.ts</code>) on price; switch to OpenAI only if you need a specific capability or already have committed OpenAI spend.</p>
+    <div class="note info">
+      <strong>Not yet enabled, but available:</strong> Anthropic's batch API (-50%) and prompt caching (-90% on cached input) would meaningfully cut the background-model and repeated-system-prompt costs (lead scoring, estimating anchors). Worth wiring up if AI volume grows.
+    </div>
+  </section>
+
+  <section id="stripe">
+    <h2><span class="step">7</span>The Stripe caveat</h2>
+    <p>Stripe's 2.9% + $0.30 per charge is the largest dollar figure in the whole system, but it is <strong>not an operating cost of running FieldOS AI</strong> — it's a transaction fee on the tenant's <em>own</em> customer payments, deducted from their revenue. On the Stripe Connect <strong>Standard</strong> model used here, the platform adds <strong>no extra per-account or per-payout fee</strong>; the connected business pays Stripe directly.</p>
+    <p>So a plumber processing $50,000/month through invoices pays ~$1,450 in Stripe fees on their income — that scales with their turnover, not with your hosting bill, and should be modelled as a pass-through, never lumped into platform COGS.</p>
+  </section>
+
+  <section id="levers">
+    <h2><span class="step">8</span>Cost levers, biggest first</h2>
+    <ol>
+      <li><strong>Voice receptionist minutes</strong> — by far the largest per-tenant variable. Shorter call flows and per-tenant minute caps have the most impact.</li>
+      <li><strong>AI Coach round count</strong> — <code>MAX_TOOL_ROUNDS=5</code>. Lowering it, or capping turns/day per plan tier, bounds the priciest AI action.</li>
+      <li><strong>Prompt caching / batch API</strong> — up to -90%/-50% on the high-volume background calls; not yet enabled.</li>
+      <li><strong>Provider choice</strong> — Anthropic is ~half the live-model cost today.</li>
+      <li><strong>Platform tiers</strong> — fixed and shared; only matters at scale (Supabase compute, Vercel bandwidth/invocation overages).</li>
+      <li><strong>Google review poll cadence</strong> — daily is cheap; only watch it once you have dozens of tenants pushing Places calls past the free Enterprise allowance.</li>
+    </ol>
+  </section>
+
+  <section id="sources">
+    <h2>Sources</h2>
+    <p class="src">All prices retrieved June 2026 from official pricing pages:</p>
+    <ul class="src">
+      <li>Anthropic — <a href="https://platform.claude.com/docs/en/about-claude/pricing">platform.claude.com/docs/en/about-claude/pricing</a></li>
+      <li>OpenAI API &amp; Whisper — <a href="https://openai.com/api/pricing/">openai.com/api/pricing</a></li>
+      <li>Twilio Voice / Messaging / WhatsApp — <a href="https://www.twilio.com/en-us/pricing">twilio.com/en-us/pricing</a></li>
+      <li>Supabase — <a href="https://supabase.com/pricing">supabase.com/pricing</a></li>
+      <li>Vercel — <a href="https://vercel.com/pricing">vercel.com/pricing</a></li>
+      <li>Resend — <a href="https://resend.com/pricing">resend.com/pricing</a></li>
+      <li>Google Maps Platform — <a href="https://developers.google.com/maps/billing-and-pricing/pricing">developers.google.com/maps/billing-and-pricing/pricing</a></li>
+      <li>Mapbox — <a href="https://www.mapbox.com/pricing">mapbox.com/pricing</a></li>
+      <li>Stripe / Connect — <a href="https://stripe.com/pricing">stripe.com/pricing</a> · <a href="https://stripe.com/connect/pricing">stripe.com/connect/pricing</a></li>
+    </ul>
+  </section>
+
+</div>
+
+<footer>
+  FieldOS AI — Running Cost Report · generated June 2026 · figures are modelled estimates from this codebase's actual models and call patterns; verify against your own bills.
+</footer>
+
+</body>
+</html>

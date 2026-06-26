@@ -40,6 +40,8 @@ export async function updateCompany(
       payment_terms_days: d.payment_terms_days,
       monthly_overhead: d.monthly_overhead ?? 0,
       language: d.language,
+      google_business_profile_url: d.google_business_profile_url || null,
+      google_place_id: d.google_place_id || null,
     })
     .eq("id", ctx.company.id);
 

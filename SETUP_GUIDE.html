@@ -205,8 +205,9 @@ Copy-Item .env.example .env.local</code></pre>
         <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td><span class="pill p1">Required</span></td><td><code>http://localhost:3000</code> locally; your domain in prod</td></tr>
         <tr><td><code>NEXT_PUBLIC_APP_NAME</code></td><td><span class="pill p1">Required</span></td><td><code>FieldOS AI</code></td></tr>
         <tr><td><code>CRON_SECRET</code></td><td><span class="pill p1">Required</span></td><td>Any long random string — guards <code>/api/cron/*</code></td></tr>
-        <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="pill later">Optional</span></td><td><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> — powers every AI feature: estimating, lead scoring, voice receptionist, AI Coach/CFO, revenue-forecast narrative</td></tr>
-        <tr><td><code>OPENAI_API_KEY</code></td><td><span class="pill later">Optional</span></td><td>OpenAI — Whisper transcription for technician voice reports only</td></tr>
+        <tr><td><code>AI_PROVIDER</code></td><td><span class="pill later">Optional</span></td><td><code>anthropic</code> (default) or <code>openai</code> — picks which LLM powers every AI feature: estimating, lead scoring, voice receptionist, AI Coach/CFO, revenue-forecast narrative, copilot. Both SDKs ship in every build, so flipping this is a redeploy of env vars, not code.</td></tr>
+        <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="pill later">Optional</span></td><td><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> — required when <code>AI_PROVIDER=anthropic</code> (or unset)</td></tr>
+        <tr><td><code>OPENAI_API_KEY</code></td><td><span class="pill later">Optional</span></td><td><a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a> — required when <code>AI_PROVIDER=openai</code>, and always used for Whisper transcription of technician voice reports regardless of the provider switch</td></tr>
         <tr><td><code>STRIPE_SECRET_KEY</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → API keys</td></tr>
         <tr><td><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → API keys</td></tr>
         <tr><td><code>STRIPE_WEBHOOK_SECRET</code></td><td><span class="pill later">Optional</span></td><td>Stripe dashboard → Developers → Webhooks (endpoint <code>/api/stripe/webhook</code>)</td></tr>
@@ -216,7 +217,7 @@ Copy-Item .env.example .env.local</code></pre>
         <tr><td><code>TWILIO_WHATSAPP_FROM</code></td><td><span class="pill later">Optional</span></td><td>Twilio WhatsApp sandbox/sender, e.g. <code>whatsapp:+14155238886</code></td></tr>
         <tr><td><code>TWILIO_SMS_FROM</code></td><td><span class="pill later">Optional</span></td><td>A Twilio phone number, e.g. <code>+44...</code></td></tr>
         <tr><td><code>RESEND_API_KEY</code> / <code>RESEND_FROM_EMAIL</code></td><td><span class="pill later">Optional</span></td><td><a href="https://resend.com" target="_blank" rel="noopener">resend.com</a> — quote/invoice/team-invite emails</td></tr>
-        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Optional</span></td><td>Google Cloud → Maps Platform, enable <strong>Distance Matrix API</strong> + <strong>Routes API</strong> — auto-scheduler travel times &amp; route optimisation</td></tr>
+        <tr><td><code>GOOGLE_MAPS_SERVER_KEY</code></td><td><span class="pill later">Optional</span></td><td>Google Cloud → Maps Platform, enable <strong>Distance Matrix API</strong> + <strong>Routes API</strong> + <strong>Places API (New)</strong> — auto-scheduler travel times, route optimisation, and Google review polling (per-company Place ID is set in Settings)</td></tr>
         <tr><td><code>NEXT_PUBLIC_MAPBOX_TOKEN</code></td><td><span class="pill later">Optional</span></td><td><a href="https://mapbox.com" target="_blank" rel="noopener">mapbox.com</a> (map rendering)</td></tr>
         <tr><td><code>PUPPETEER_EXECUTABLE_PATH</code></td><td><span class="pill later">Optional (local only)</span></td><td>Path to a local Chrome/Edge install, used to render estimate/invoice PDFs in dev. Unused on Vercel (a bundled serverless Chromium is used there instead).</td></tr>
       </tbody>
@@ -331,8 +332,8 @@ Copy-Item .env.example .env.local</code></pre>
     </table>
     <div class="note info">
       <strong>Cron jobs</strong>
-      Scheduled tasks run as routes guarded by <code>CRON_SECRET</code> (sent as <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code>). The renewal-reminder cron ships at <code>POST /api/cron/renewals</code> — schedule it daily with a <code>vercel.json</code> cron entry or any external scheduler. Example <code>vercel.json</code>:
-      <pre><code>{ "crons": [ { "path": "/api/cron/renewals", "schedule": "0 8 * * *" } ] }</code></pre>
+      Scheduled tasks run as routes guarded by <code>CRON_SECRET</code> (sent as <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code>). Two cron routes ship: <code>POST /api/cron/renewals</code> (daily renewal reminders) and <code>POST /api/cron/review-poll</code> (checks Google for new reviews on companies that have set a Place ID — no-ops without <code>GOOGLE_MAPS_SERVER_KEY</code>). Schedule both daily with a <code>vercel.json</code> cron entry or any external scheduler. Example <code>vercel.json</code>:
+      <pre><code>{ "crons": [ { "path": "/api/cron/renewals", "schedule": "0 8 * * *" }, { "path": "/api/cron/review-poll", "schedule": "0 9 * * *" } ] }</code></pre>
     </div>
   </section>
 

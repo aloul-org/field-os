@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MODELS, runJsonPrompt, type ImageInput } from "@/lib/ai/anthropic";
+import { MODELS, runJsonPrompt, type ImageInput } from "@/lib/ai/provider";
 import { tradeLabel } from "@/lib/trades";
 import type { AppLanguage, Region } from "@/lib/types/database";
 

@@ -2,35 +2,39 @@ import type { LeadStatus, LeadSource } from "@/lib/types/database";
 
 type BadgeVariant = "secondary" | "default" | "success" | "destructive" | "warning";
 
-export const LEAD_STATUS_META: Record<
-  LeadStatus,
-  { label: string; variant: BadgeVariant }
-> = {
-  new: { label: "New", variant: "default" },
-  contacted: { label: "Contacted", variant: "secondary" },
-  quoted: { label: "Quoted", variant: "warning" },
-  converted: { label: "Won", variant: "success" },
-  lost: { label: "Lost", variant: "destructive" },
-  spam: { label: "Spam", variant: "secondary" },
+/**
+ * Status metadata without translated labels — labels are looked up via
+ * `useTranslations("status")` / `getTranslations("status")` in the rendering
+ * component, keyed as `status.lead.<key>` (see messages/en.json + de.json).
+ * Keeping the key here, not the label, lets the same data drive both locales.
+ */
+export const LEAD_STATUS_META: Record<LeadStatus, { variant: BadgeVariant }> = {
+  new: { variant: "default" },
+  contacted: { variant: "secondary" },
+  quoted: { variant: "warning" },
+  converted: { variant: "success" },
+  lost: { variant: "destructive" },
+  spam: { variant: "secondary" },
 };
 
 /** Inbox filter tabs, in workflow order. "all" is handled by the page. */
-export const LEAD_STATUS_TABS: { key: LeadStatus | "all"; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "new", label: "New" },
-  { key: "contacted", label: "Contacted" },
-  { key: "quoted", label: "Quoted" },
-  { key: "converted", label: "Won" },
-  { key: "lost", label: "Lost" },
+export const LEAD_STATUS_TABS: (LeadStatus | "all")[] = [
+  "all",
+  "new",
+  "contacted",
+  "quoted",
+  "converted",
+  "lost",
 ];
 
-export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
-  phone_call: "Phone call",
-  whatsapp: "WhatsApp",
-  sms: "SMS",
-  website_widget: "Website",
-  facebook: "Facebook",
-  instagram: "Instagram",
-  manual: "Manual",
-  email: "Email",
-};
+/** Source values, in display order. Labels come from `status.leadSource.<key>`. */
+export const LEAD_SOURCES: LeadSource[] = [
+  "phone_call",
+  "whatsapp",
+  "sms",
+  "website_widget",
+  "facebook",
+  "instagram",
+  "manual",
+  "email",
+];
