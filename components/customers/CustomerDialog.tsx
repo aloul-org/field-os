@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,19 +37,41 @@ import { useToast } from "@/hooks/use-toast";
 import type { CustomerRow } from "@/lib/types/database";
 
 interface Props {
-  trigger: React.ReactNode;
+  /** Omit when driving the dialog with the controlled `open`/`onOpenChange` props. */
+  trigger?: React.ReactNode;
   /** Provide to edit an existing customer; omit to create. */
   customer?: CustomerRow;
+  /** Controlled open state (e.g. when launched from another menu). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Prefill the name field on open (e.g. from a search box). */
+  defaultName?: string;
+  /**
+   * When provided, the dialog calls this with the new customer instead of
+   * navigating to its profile — used to create-and-select inline.
+   */
+  onCreated?: (customer: { id: string; name: string }) => void;
 }
 
-export function CustomerDialog({ trigger, customer }: Props) {
+export function CustomerDialog({
+  trigger,
+  customer,
+  open: openProp,
+  onOpenChange,
+  defaultName,
+  onCreated,
+}: Props) {
   const t = useTranslations("customers");
   const tc = useTranslations("common");
   const router = useRouter();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const isEdit = Boolean(customer);
+
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : internalOpen;
+  const setOpen = isControlled ? onOpenChange ?? (() => {}) : setInternalOpen;
 
   const form = useForm<CustomerInput>({
     resolver: zodResolver(customerSchema),
@@ -61,6 +83,20 @@ export function CustomerDialog({ trigger, customer }: Props) {
       notes: customer?.notes ?? "",
     },
   });
+
+  // When opening a fresh "create" dialog, seed the name from the search box.
+  useEffect(() => {
+    if (open && !isEdit) {
+      form.reset({
+        name: defaultName ?? "",
+        email: "",
+        phone: "",
+        customer_type: "residential",
+        notes: "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   async function onSubmit(values: CustomerInput) {
     setSubmitting(true);
@@ -77,7 +113,11 @@ export function CustomerDialog({ trigger, customer }: Props) {
     setOpen(false);
     form.reset(values);
     if (!isEdit && result.data) {
-      router.push(`/customers/${result.data.id}`);
+      if (onCreated) {
+        onCreated({ id: result.data.id, name: values.name });
+      } else {
+        router.push(`/customers/${result.data.id}`);
+      }
     } else {
       router.refresh();
     }
@@ -85,7 +125,7 @@ export function CustomerDialog({ trigger, customer }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>

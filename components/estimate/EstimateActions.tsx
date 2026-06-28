@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Send, Copy, ExternalLink, Check, ReceiptText, Briefcase } from "lucide-react";
+import { Send, Copy, ExternalLink, Check, ReceiptText, Briefcase, Pencil } from "lucide-react";
 
 import { sendEstimate } from "@/app/(app)/estimates/actions";
 import { createInvoiceFromEstimate } from "@/app/(app)/invoices/actions";
@@ -67,6 +67,13 @@ export function EstimateActions({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
+        {canWrite && status === "draft" && (
+          <Button asChild variant="outline">
+            <Link href={`/estimates/${id}/edit`}>
+              <Pencil className="h-4 w-4" /> Edit
+            </Link>
+          </Button>
+        )}
         {canWrite && status === "draft" && (
           <Button onClick={handleSend} disabled={sending}>
             <Send className="h-4 w-4" /> {sending ? "Sending…" : "Send to customer"}

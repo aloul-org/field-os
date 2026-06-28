@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Mic, MicOff, Loader2 } from "lucide-react";
 
-import { createEstimate } from "@/app/(app)/estimates/actions";
+import { createEstimate, updateEstimate } from "@/app/(app)/estimates/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,32 +47,62 @@ interface SpeechRecognitionLike {
   onend: (() => void) | null;
 }
 
+export interface InitialDraft {
+  jobTitle: string;
+  summary: string;
+  description?: string;
+  vatRate?: number;
+  confidence?: "high" | "medium" | "low" | null;
+  flags?: string[];
+  lineItems: EditableLineItem[];
+}
+
 export function EstimateBuilder({
   initialCustomer,
   region,
+  estimateId,
+  initialDraft,
 }: {
   initialCustomer: PickedCustomer | null;
   region: "UK" | "DE";
+  /** Set when editing an existing draft — save updates instead of creating. */
+  estimateId?: string;
+  initialDraft?: InitialDraft;
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const isEdit = Boolean(estimateId);
 
   const [customer, setCustomer] = useState<PickedCustomer | null>(initialCustomer);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDraft?.description ?? "");
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const draftRef = useRef<HTMLDivElement>(null);
 
-  // Draft (editable after extraction or built manually).
-  const [hasDraft, setHasDraft] = useState(false);
-  const [jobTitle, setJobTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [vatRate, setVatRate] = useState(region === "DE" ? 0.19 : 0.2);
-  const [confidence, setConfidence] = useState<"high" | "medium" | "low" | null>(null);
-  const [flags, setFlags] = useState<string[]>([]);
-  const [lineItems, setLineItems] = useState<EditableLineItem[]>([]);
+  // Draft (editable after extraction, built manually, or loaded for editing).
+  const [hasDraft, setHasDraft] = useState(Boolean(initialDraft));
+  const [jobTitle, setJobTitle] = useState(initialDraft?.jobTitle ?? "");
+  const [summary, setSummary] = useState(initialDraft?.summary ?? "");
+  const [vatRate, setVatRate] = useState(
+    initialDraft?.vatRate ?? (region === "DE" ? 0.19 : 0.2)
+  );
+  const [confidence, setConfidence] = useState<"high" | "medium" | "low" | null>(
+    initialDraft?.confidence ?? null
+  );
+  const [flags, setFlags] = useState<string[]>(initialDraft?.flags ?? []);
+  const [lineItems, setLineItems] = useState<EditableLineItem[]>(
+    initialDraft?.lineItems ?? []
+  );
+
+  /** Smoothly bring the editable draft into view once it appears. */
+  function scrollToDraft() {
+    setTimeout(() => {
+      draftRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }
 
   function applyDraft(d: ExtractResponse) {
     setJobTitle(d.job_title);
@@ -114,6 +144,7 @@ export function EstimateBuilder({
         return;
       }
       applyDraft(json.data as ExtractResponse);
+      scrollToDraft();
     } catch {
       toast({ variant: "destructive", description: "Network error — please try again." });
     } finally {
@@ -124,6 +155,7 @@ export function EstimateBuilder({
   function startManual() {
     setLineItems([{ description: "", quantity: 1, unit_price: 0, kind: "labour" }]);
     setHasDraft(true);
+    scrollToDraft();
   }
 
   function toggleDictation() {
@@ -169,7 +201,7 @@ export function EstimateBuilder({
       return;
     }
     setSaving(true);
-    const result = await createEstimate({
+    const payload = {
       customer_id: customer.id,
       property_id: customer.propertyId ?? null,
       job_title: jobTitle.trim(),
@@ -184,7 +216,10 @@ export function EstimateBuilder({
       ai_confidence: confidence,
       ai_flags: flags,
       photo_urls: [],
-    });
+    };
+    const result = estimateId
+      ? await updateEstimate(estimateId, payload)
+      : await createEstimate(payload);
     setSaving(false);
     if (!result.ok) {
       toast({ variant: "destructive", description: result.error });
@@ -282,7 +317,7 @@ export function EstimateBuilder({
       </Card>
 
       {hasDraft && (
-        <Card>
+        <Card ref={draftRef} className="scroll-mt-6">
           <CardHeader>
             <CardTitle className="text-base">Review &amp; edit</CardTitle>
           </CardHeader>
@@ -316,7 +351,11 @@ export function EstimateBuilder({
             </div>
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving} size="lg">
-                {saving ? "Saving…" : "Save draft estimate"}
+                {saving
+                  ? "Saving…"
+                  : isEdit
+                    ? "Save changes"
+                    : "Save draft estimate"}
               </Button>
             </div>
           </CardContent>
