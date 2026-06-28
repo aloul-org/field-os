@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { setLocaleCookie } from "@/i18n/actions";
+import { homeDestination } from "@/lib/auth/roles";
 
 /**
  * Called right after a successful client-side sign-in. Syncs the UI locale to
@@ -36,7 +37,7 @@ export async function completeLogin(): Promise<{ destination: string }> {
     await setLocaleCookie(company.language);
   }
 
-  // Technicians use the mobile app surface only.
-  if (member.role === "technician") return { destination: "/tech/today" };
-  return { destination: "/dashboard" };
+  // Land on the headline feature (estimate builder) where the role allows it;
+  // technicians go to the field PWA, dispatchers to the dashboard.
+  return { destination: homeDestination(member.role) };
 }

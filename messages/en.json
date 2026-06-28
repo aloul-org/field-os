@@ -18,6 +18,7 @@
     "optional": "optional"
   },
   "nav": {
+    "home": "New estimate",
     "dashboard": "Dashboard",
     "leads": "Leads",
     "calls": "Calls",

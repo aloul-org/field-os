@@ -335,6 +335,10 @@ Copy-Item .env.example .env.local</code></pre>
       Scheduled tasks run as routes guarded by <code>CRON_SECRET</code> (sent as <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code>). Two cron routes ship: <code>POST /api/cron/renewals</code> (daily renewal reminders) and <code>POST /api/cron/review-poll</code> (checks Google for new reviews on companies that have set a Place ID — no-ops without <code>GOOGLE_MAPS_SERVER_KEY</code>). Schedule both daily with a <code>vercel.json</code> cron entry or any external scheduler. Example <code>vercel.json</code>:
       <pre><code>{ "crons": [ { "path": "/api/cron/renewals", "schedule": "0 8 * * *" }, { "path": "/api/cron/review-poll", "schedule": "0 9 * * *" } ] }</code></pre>
     </div>
+    <div class="note info">
+      <strong>Estimate-first navigation</strong>
+      Estimating is the headline feature, so after login owners, admins and estimators land directly on the estimate builder (<code>/estimates/new</code>) — pinned to the top of the sidebar as <strong>Home</strong>. Dispatchers (no estimate access) still land on the dashboard; technicians go to the field PWA. The public marketing home page also exposes a live, rate-limited "try an estimate" demo at <code>POST /api/public/estimate-demo</code> — it uses the same AI key as the rest of the app and falls back to a canned sample if no key is set, so it never breaks the landing page.
+    </div>
   </section>
 
   <!-- 12 -->

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { homeDestination } from "@/lib/auth/roles";
 
 /**
  * OAuth + email-link callback. Exchanges the auth code for a session, then
@@ -31,12 +32,17 @@ export async function GET(request: NextRequest) {
   if (user) {
     const { data: member } = await supabase
       .from("team_members")
-      .select("id")
+      .select("role")
       .eq("user_id", user.id)
       .not("invite_accepted_at", "is", null)
       .limit(1)
       .maybeSingle();
-    if (!member) destination = "/onboarding/company";
+    if (!member) {
+      destination = "/onboarding/company";
+    } else if (!redirectTo) {
+      // No explicit return target → open the headline feature for this role.
+      destination = homeDestination(member.role);
+    }
   }
 
   return NextResponse.redirect(`${origin}${destination}`);

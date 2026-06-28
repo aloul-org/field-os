@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { RouteLine } from "@/components/shared/RouteLine";
 import { AreaChart } from "@/components/charts/AreaChart";
 import { Reveal } from "@/components/marketing/Reveal";
+import { TryEstimate } from "@/components/marketing/TryEstimate";
 import { FeatureShowcase } from "@/components/marketing/FeatureShowcase";
 import { chipColor } from "@/components/marketing/chipColors";
 import { cn } from "@/lib/utils";
@@ -213,6 +214,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ───────────────── Try the estimator (live demo) ───────────────── */}
+      <TryEstimate />
 
       {/* ───────────────── The revenue loop ───────────────── */}
       <section className="mx-auto max-w-6xl px-4 py-20">

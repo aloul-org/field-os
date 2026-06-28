@@ -58,6 +58,18 @@ export function canAccess(role: TeamRole, section: AppSection): boolean {
   return ROLE_SECTIONS[role]?.includes(section) ?? false;
 }
 
+/**
+ * Where a user lands after login. Estimating is the product's headline feature,
+ * so anyone who can write estimates opens straight into the estimate builder.
+ * Technicians live in the field PWA; roles without estimate access (e.g.
+ * dispatcher) fall back to the dashboard.
+ */
+export function homeDestination(role: TeamRole): string {
+  if (role === "technician") return "/tech/today";
+  if (canAccess(role, "estimates") && canWrite(role)) return "/estimates/new";
+  return "/dashboard";
+}
+
 export function accessibleSections(role: TeamRole): AppSection[] {
   return ROLE_SECTIONS[role] ?? [];
 }

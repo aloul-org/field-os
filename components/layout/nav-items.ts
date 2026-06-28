@@ -3,6 +3,7 @@ import type { AppSection } from "@/lib/auth/roles";
 /** Lucide icon name (resolved client-side via NAV_ICON_MAP) — not the component itself, since
  * NavItem[] crosses the server/client boundary as a prop and functions can't be serialized. */
 export type NavIconName =
+  | "Home"
   | "LayoutGrid"
   | "Inbox"
   | "PhoneCall"
@@ -19,6 +20,7 @@ export type NavIconName =
   | "Settings";
 
 export type NavGroupId =
+  | "home"
   | "overview"
   | "sales"
   | "operations"
@@ -42,6 +44,14 @@ export interface NavGroup {
 }
 
 export const NAV_GROUPS: NavGroup[] = [
+  {
+    id: "home",
+    label: "Home",
+    chipIdle: "bg-primary/10 text-primary",
+    chipActive: "bg-primary text-primary-foreground",
+    rowActive: "bg-primary/10",
+    bar: "bg-primary",
+  },
   {
     id: "overview",
     label: "Overview",
@@ -105,6 +115,9 @@ export interface NavItem {
 
 /** Grouped for the sidebar; flat order also drives the mobile bottom bar. */
 export const NAV_ITEMS: NavItem[] = [
+  // Headline feature — first thing users see, and the post-login landing page.
+  { key: "home", href: "/estimates/new", icon: "Home", section: "estimates", group: "home" },
+
   { key: "dashboard", href: "/dashboard", icon: "LayoutGrid", section: "dashboard", group: "overview" },
 
   { key: "leads", href: "/leads", icon: "Inbox", section: "leads", group: "sales" },

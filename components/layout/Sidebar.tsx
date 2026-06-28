@@ -14,6 +14,13 @@ import { NAV_ICON_MAP } from "@/components/layout/nav-icon-map";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
+  // /estimates/new is the Home item; keep it off the Estimates-list row.
+  if (href === "/estimates") {
+    return (
+      pathname === "/estimates" ||
+      (pathname.startsWith("/estimates/") && !pathname.startsWith("/estimates/new"))
+    );
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

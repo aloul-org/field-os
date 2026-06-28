@@ -1,4 +1,5 @@
 import {
+  Home,
   LayoutGrid,
   Inbox,
   PhoneCall,
@@ -18,6 +19,7 @@ import {
 import type { NavIconName } from "@/components/layout/nav-items";
 
 export const NAV_ICON_MAP: Record<NavIconName, typeof LayoutGrid> = {
+  Home,
   LayoutGrid,
   Inbox,
   PhoneCall,
