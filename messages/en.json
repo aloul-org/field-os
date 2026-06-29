@@ -59,6 +59,12 @@
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
+    "labelCompany": "Business",
+    "labelTrade": "Trade",
+    "labelPricing": "Pricing",
+    "labelTeam": "Team",
+    "labelIntegrations": "Tools",
+    "labelPlan": "Plan",
     "companyTitle": "Tell us about your business",
     "businessName": "Business name",
     "ownerName": "Your name",

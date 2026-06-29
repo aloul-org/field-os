@@ -59,6 +59,12 @@
   },
   "onboarding": {
     "stepOf": "Schritt {current} von {total}",
+    "labelCompany": "Betrieb",
+    "labelTrade": "Gewerk",
+    "labelPricing": "Preise",
+    "labelTeam": "Team",
+    "labelIntegrations": "Tools",
+    "labelPlan": "Tarif",
     "companyTitle": "Erzählen Sie uns von Ihrem Unternehmen",
     "businessName": "Firmenname",
     "ownerName": "Ihr Name",

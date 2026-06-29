@@ -1,11 +1,14 @@
-/** Ordered onboarding steps — drives the progress bar and next/prev links. */
+/**
+ * Ordered onboarding steps — drives the stepper and next/prev links. `labelKey`
+ * is the short stepper caption (under the `onboarding` i18n namespace).
+ */
 export const ONBOARDING_STEPS = [
-  { path: "/onboarding/company", key: "company" },
-  { path: "/onboarding/trade", key: "trade" },
-  { path: "/onboarding/pricing-defaults", key: "pricing" },
-  { path: "/onboarding/team", key: "team" },
-  { path: "/onboarding/integrations", key: "integrations" },
-  { path: "/onboarding/plan", key: "plan" },
+  { path: "/onboarding/company", key: "company", labelKey: "labelCompany" },
+  { path: "/onboarding/trade", key: "trade", labelKey: "labelTrade" },
+  { path: "/onboarding/pricing-defaults", key: "pricing", labelKey: "labelPricing" },
+  { path: "/onboarding/team", key: "team", labelKey: "labelTeam" },
+  { path: "/onboarding/integrations", key: "integrations", labelKey: "labelIntegrations" },
+  { path: "/onboarding/plan", key: "plan", labelKey: "labelPlan" },
 ] as const;
 
 export const TOTAL_STEPS = ONBOARDING_STEPS.length;
