@@ -40,6 +40,23 @@ export function createClient() {
 }
 
 /**
+ * Supabase client authenticated by a bearer token rather than cookies, for the
+ * mobile app (which holds a Supabase JWT in secure storage and has no cookie
+ * jar). RLS applies exactly as it does for the cookie flow — the JWT identifies
+ * the user, so this grants no privilege the web session wouldn't.
+ */
+export function createBearerClient(accessToken: string) {
+  return createSupabaseClient<Database>(
+    publicEnv.supabaseUrl,
+    publicEnv.supabaseAnonKey,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    }
+  );
+}
+
+/**
  * Service-role client that bypasses RLS. ONLY for trusted server contexts:
  * cron jobs, webhooks, and the background queue processor. Never expose this to
  * the browser and never derive the acting company from user input without an

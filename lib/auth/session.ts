@@ -1,9 +1,14 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 
-import { createClient } from "@/lib/supabase/server";
-import type { CompanyRow, TeamMemberRow, TeamRole } from "@/lib/types/database";
+import { createClient, createBearerClient } from "@/lib/supabase/server";
+import type {
+  CompanyRow,
+  Database,
+  TeamMemberRow,
+  TeamRole,
+} from "@/lib/types/database";
 import { canAccess, type AppSection } from "@/lib/auth/roles";
 
 export interface ActiveContext {
@@ -11,6 +16,36 @@ export interface ActiveContext {
   company: CompanyRow;
   member: TeamMemberRow;
   role: TeamRole;
+}
+
+/**
+ * Resolve membership + company for an already-authenticated user. Shared by the
+ * cookie and bearer flows so both derive the acting company identically.
+ */
+async function loadContext(
+  supabase: SupabaseClient<Database>,
+  user: User
+): Promise<ActiveContext | null> {
+  const { data: member, error } = await supabase
+    .from("team_members")
+    .select("*")
+    .eq("user_id", user.id)
+    .not("invite_accepted_at", "is", null)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !member) return null;
+
+  const { data: company, error: companyError } = await supabase
+    .from("companies")
+    .select("*")
+    .eq("id", member.company_id)
+    .single();
+
+  if (companyError || !company) return null;
+
+  return { user, company, member, role: member.role };
 }
 
 /** The authenticated user, or null. Cached per request. */
@@ -34,46 +69,70 @@ export const getActiveContext = cache(async (): Promise<ActiveContext | null> =>
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: member, error } = await supabase
-    .from("team_members")
-    .select("*")
-    .eq("user_id", user.id)
-    .not("invite_accepted_at", "is", null)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (error || !member) return null;
-
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .select("*")
-    .eq("id", member.company_id)
-    .single();
-
-  if (companyError || !company) return null;
-
-  return {
-    user,
-    company,
-    member,
-    role: member.role,
-  };
+  return loadContext(supabase, user);
 });
 
+/** Extract a non-empty `Authorization: Bearer <jwt>` token, if present. */
+function bearerToken(request: Request): string | null {
+  const header = request.headers.get("authorization");
+  if (!header || !header.toLowerCase().startsWith("bearer ")) return null;
+  const token = header.slice("bearer ".length).trim();
+  return token.length > 0 ? token : null;
+}
+
 /**
- * Route-handler variant of access control. Returns the context or null instead
- * of redirecting (API routes return JSON errors, never HTML redirects).
+ * Context for a bearer-authenticated (mobile) request. The JWT is verified by
+ * Supabase via getUser(token) — an invalid or expired token yields null, never
+ * a context.
+ */
+async function getBearerContext(
+  token: string
+): Promise<{ ctx: ActiveContext; supabase: SupabaseClient<Database> } | null> {
+  const supabase = createBearerClient(token);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token);
+  if (!user) return null;
+
+  const ctx = await loadContext(supabase, user);
+  return ctx ? { ctx, supabase } : null;
+}
+
+/**
+ * Route-handler variant of access control. Returns the context or an error tag
+ * instead of redirecting (API routes return JSON errors, never HTML redirects).
+ *
+ * Pass `request` to additionally accept mobile's `Authorization: Bearer <jwt>`;
+ * without it, only the cookie session is considered. The bearer path is tried
+ * first so an explicit token always wins over any ambient cookie.
+ *
+ * IMPORTANT: use the returned `supabase` client for subsequent queries rather
+ * than calling createClient() again — a bearer request carries no cookies, so a
+ * cookie-bound client would run as anon and RLS would silently return nothing.
  */
 export async function getRouteContext(
-  section?: AppSection
-): Promise<{ ctx: ActiveContext } | { error: "unauthorized" | "forbidden" }> {
-  const ctx = await getActiveContext();
-  if (!ctx) return { error: "unauthorized" };
+  section?: AppSection,
+  request?: Request
+): Promise<
+  | { ctx: ActiveContext; supabase: SupabaseClient<Database> }
+  | { error: "unauthorized" | "forbidden" }
+> {
+  const token = request ? bearerToken(request) : null;
+  const resolved = token
+    ? await getBearerContext(token)
+    : await (async () => {
+        const ctx = await getActiveContext();
+        return ctx
+          ? { ctx, supabase: createClient() as SupabaseClient<Database> }
+          : null;
+      })();
+
+  if (!resolved) return { error: "unauthorized" };
+  const { ctx } = resolved;
   if (section && ctx.role !== "technician" && !canAccess(ctx.role, section)) {
     return { error: "forbidden" };
   }
-  return { ctx };
+  return resolved;
 }
 
 /** Require an authenticated user; redirect to /login otherwise. */

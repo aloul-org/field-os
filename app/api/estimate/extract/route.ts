@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { getRouteContext } from "@/lib/auth/session";
 import { ok, err, unauthorized, forbidden, parseBody } from "@/lib/api/response";
 import { extractRequestSchema } from "@/lib/validations/estimate";
@@ -10,16 +9,16 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const auth = await getRouteContext("estimates");
+  // `request` is passed so the mobile app can authenticate with a Supabase JWT
+  // (Authorization: Bearer) instead of a cookie session.
+  const auth = await getRouteContext("estimates", request);
   if ("error" in auth) {
     return auth.error === "unauthorized" ? unauthorized() : forbidden();
   }
-  const { ctx } = auth;
+  const { ctx, supabase } = auth;
 
   const { data: body, error } = await parseBody(request, extractRequestSchema);
   if (error) return error;
-
-  const supabase = createClient();
 
   // Historical Estimate Engine: inject the 5 most recent accepted estimates in
   // the same trade_category as pricing anchors.
