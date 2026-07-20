@@ -41,3 +41,7 @@ next-env.d.ts
 /public/workbox-*.js
 /public/workbox-*.js.map
 /public/fallback-*.js
+
+# The Flutter app lives in its own repo at ../fieldos-mobile — never commit it here.
+# (An empty mobile/ husk may linger until the process holding it lets go.)
+mobile/

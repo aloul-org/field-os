@@ -5,11 +5,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSection } from "@/lib/auth/session";
 import { canWrite } from "@/lib/auth/roles";
-import { publicEnv } from "@/lib/env";
 import { computeTotals } from "@/lib/money";
 import { nextDocumentNumber } from "@/lib/documents";
 import { computeWinProbability } from "@/lib/estimates/winStats";
-import { sendEmail } from "@/lib/messaging/email";
+import { sendEstimateCore } from "@/lib/estimates/send-estimate";
 import {
   createEstimateSchema,
   type CreateEstimateInput,
@@ -171,49 +170,12 @@ export async function sendEstimate(
   if (!canWrite(ctx.role)) return { ok: false, error: WRITE_DENIED };
 
   const supabase = createClient();
-  const { data: estimate, error } = await supabase
-    .from("estimates")
-    .select("id, status, acceptance_token, job_title, total_inc_vat, customer_id, sent_at")
-    .eq("id", id)
-    .eq("company_id", ctx.company.id)
-    .maybeSingle();
-
-  if (error || !estimate) return { ok: false, error: "Estimate not found." };
-
-  const { error: updateError } = await supabase
-    .from("estimates")
-    .update({
-      status: "sent",
-      sent_at: estimate.sent_at ?? new Date().toISOString(),
-    })
-    .eq("id", id)
-    .eq("company_id", ctx.company.id);
-
-  if (updateError) return { ok: false, error: "Could not send the estimate." };
-
-  const url = `${publicEnv.appUrl}/quote/${estimate.acceptance_token}`;
-
-  // Best-effort email to the customer (Resend); falls back to copy-the-link.
-  let emailed = false;
-  if (estimate.customer_id) {
-    const { data: customer } = await supabase
-      .from("customers")
-      .select("email, name")
-      .eq("id", estimate.customer_id)
-      .maybeSingle();
-    if (customer?.email) {
-      const res = await sendEmail({
-        to: customer.email,
-        subject: `Your quote from ${ctx.company.business_name}`,
-        html: `<p>Hi ${customer.name},</p><p>${ctx.company.business_name} has sent you a quote for "${estimate.job_title}".</p><p><a href="${url}">View and accept your quote</a></p>`,
-      });
-      emailed = res.ok;
-    }
-  }
+  const result = await sendEstimateCore(supabase, ctx, id);
+  if (!result.ok) return result;
 
   revalidatePath(`/estimates/${id}`);
   revalidatePath("/estimates");
-  return { ok: true, data: { url, emailed } };
+  return { ok: true, data: { url: result.url, emailed: result.emailed } };
 }
 
 export async function deleteEstimate(id: string): Promise<Result> {

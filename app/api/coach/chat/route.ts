@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { createClient } from "@/lib/supabase/server";
 import { getRouteContext } from "@/lib/auth/session";
 import { ok, err, unauthorized, forbidden, parseBody } from "@/lib/api/response";
 import { runCoachTurn, type CoachMode } from "@/lib/ai/businessCoach";
@@ -20,12 +19,13 @@ export async function POST(request: Request) {
 
   const mode = body.mode as CoachMode;
   // CFO is gated on finance access; the broader coach on coach access.
-  const auth = await getRouteContext(mode === "cfo" ? "finance" : "coach");
+  // `request` lets the mobile app authenticate with a Bearer JWT; use the
+  // returned client (a bearer request has no cookies for createClient()).
+  const auth = await getRouteContext(mode === "cfo" ? "finance" : "coach", request);
   if ("error" in auth) {
     return auth.error === "unauthorized" ? unauthorized() : forbidden();
   }
-  const ctx = auth.ctx;
-  const supabase = createClient();
+  const { ctx, supabase } = auth;
 
   // Resolve or create the conversation.
   let conversationId = body.conversationId ?? null;
