@@ -129,7 +129,9 @@ export async function getRouteContext(
 
   if (!resolved) return { error: "unauthorized" };
   const { ctx } = resolved;
+
   if (ctx.company.platform_status === "suspended") return { error: "forbidden" };
+
   if (section && ctx.role !== "technician" && !canAccess(ctx.role, section)) {
     return { error: "forbidden" };
   }
