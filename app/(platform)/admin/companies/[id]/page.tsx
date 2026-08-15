@@ -61,7 +61,7 @@ export default async function AdminCompanyDetailPage({
   return (
     <div>
       <Link
-        href="/admin"
+        href="/admin/companies"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> {t("backToCompanies")}

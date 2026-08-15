@@ -21,7 +21,7 @@ export function CompanySearch() {
       if (value) next.set("q", value);
       else next.delete("q");
       startTransition(() => {
-        router.replace(`/admin?${next.toString()}`);
+        router.replace(`/admin/companies?${next.toString()}`);
       });
     }, 300);
     return () => clearTimeout(handle);

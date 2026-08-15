@@ -1,105 +1,142 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Building2 } from "lucide-react";
+import { TrendingUp, CheckCircle2, Sparkles, Building2 } from "lucide-react";
 
 import { createAdminClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/format";
+import { getPlatformReports } from "@/lib/admin/reports";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { CompanySearch } from "@/components/admin/CompanySearch";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { SubscriptionStatus } from "@/lib/types/database";
+import { StatCard } from "@/components/shared/StatCard";
+import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { AreaChart } from "@/components/charts/AreaChart";
+import { DonutChart } from "@/components/charts/DonutChart";
+import { MiniBars } from "@/components/charts/MiniBars";
+import { RadialGauge } from "@/components/charts/RadialGauge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata = { title: "Platform admin" };
+export const metadata = { title: "Platform reports" };
 
-function escapeLike(input: string): string {
-  return input.replace(/[,%()]/g, " ").trim();
-}
-
-const STATUS_VARIANT: Record<
-  SubscriptionStatus,
-  "success" | "secondary" | "destructive" | "warning"
-> = {
-  trialing: "secondary",
-  active: "success",
-  past_due: "warning",
-  canceled: "destructive",
-  incomplete: "destructive",
-};
-
-export default async function AdminCompaniesPage({
-  searchParams,
-}: {
-  searchParams: { q?: string };
-}) {
+export default async function AdminReportsPage() {
   const t = await getTranslations("admin");
-  const supabase = createAdminClient();
-  const q = escapeLike(searchParams.q ?? "");
+  const reports = await getPlatformReports(createAdminClient());
 
-  let query = supabase
-    .from("companies")
-    .select(
-      "id, business_name, email, subscription_plan, subscription_status, platform_status, created_at"
-    );
-
-  if (q) {
-    query = query.or(`business_name.ilike.%${q}%,email.ilike.%${q}%`);
-  }
-
-  const { data: companies, error } = await query
-    .order("created_at", { ascending: false })
-    .limit(200);
+  const signupsTotal = reports.signupsTrend.reduce((s, m) => s + m.value, 0);
+  const planTotal = reports.planBreakdown.reduce((s, x) => s + x.value, 0);
+  const statusTotal = reports.statusBreakdown.reduce((s, x) => s + x.value, 0);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      <div className="mb-4">
-        <CompanySearch />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
+        <StatCard
+          size="hero"
+          className="animate-fade-rise sm:col-span-2 lg:col-span-2 lg:row-span-2"
+          label={t("mrr")}
+          value={
+            <span className="flex flex-wrap items-baseline gap-x-3">
+              <AnimatedNumber value={reports.mrrGBP} kind="currency" region="UK" />
+              <span className="text-lg font-normal text-muted-foreground">
+                <AnimatedNumber value={reports.mrrEUR} kind="currency" region="DE" />
+              </span>
+            </span>
+          }
+          icon={TrendingUp}
+          tone="success"
+        />
+        <StatCard
+          className="animate-fade-rise [animation-delay:80ms]"
+          label={t("activeSubscriptions")}
+          value={<AnimatedNumber value={reports.activeCount} />}
+          icon={CheckCircle2}
+          tone="success"
+        />
+        <StatCard
+          className="animate-fade-rise [animation-delay:160ms]"
+          label={t("trialingCompanies")}
+          value={<AnimatedNumber value={reports.trialingCount} />}
+          icon={Sparkles}
+        />
+        <StatCard
+          className="animate-fade-rise [animation-delay:240ms] sm:col-span-2 lg:col-span-2"
+          label={t("totalCompanies")}
+          value={<AnimatedNumber value={reports.totalCount} />}
+          icon={Building2}
+        />
       </div>
 
-      {error ? (
-        <p className="text-sm text-destructive">{t("loadError")}</p>
-      ) : !companies || companies.length === 0 ? (
-        <EmptyState
-          icon={Building2}
-          title={q ? t("noMatches") : t("empty")}
-        />
-      ) : (
-        <Card className="divide-y">
-          {companies.map((c) => (
-            <Link
-              key={c.id}
-              href={`/admin/companies/${c.id}`}
-              className="flex flex-wrap items-center justify-between gap-3 p-4 transition-colors hover:bg-muted/50"
-            >
-              <div className="min-w-0">
-                <p className="flex items-center gap-2 truncate font-medium">
-                  {c.business_name}
-                  {c.platform_status === "suspended" && (
-                    <Badge variant="destructive">{t("suspended")}</Badge>
-                  )}
-                </p>
-                <p className="truncate text-sm text-muted-foreground">
-                  {c.email}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <Badge variant="outline" className="capitalize">
-                  {c.subscription_plan}
-                </Badge>
-                <Badge variant={STATUS_VARIANT[c.subscription_status]}>
-                  {c.subscription_status}
-                </Badge>
-                <span className="hidden text-sm text-muted-foreground sm:block">
-                  {formatDate(c.created_at)}
-                </span>
-              </div>
-            </Link>
-          ))}
+      <div className="grid gap-3 lg:grid-cols-3">
+        <Card className="animate-fade-rise lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">{t("signupsTrendTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {signupsTotal > 0 ? (
+              <AreaChart data={reports.signupsTrend} />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                {t("signupsTrendEmpty")}
+              </p>
+            )}
+          </CardContent>
         </Card>
-      )}
+
+        <Card className="animate-fade-rise [animation-delay:80ms]">
+          <CardHeader>
+            <CardTitle className="text-base">{t("conversionTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            {reports.trialsEndedCount > 0 ? (
+              <RadialGauge
+                value={reports.conversionRate}
+                label={t("conversionLabel", {
+                  converted: Math.round(
+                    (reports.conversionRate / 100) * reports.trialsEndedCount
+                  ),
+                  ended: reports.trialsEndedCount,
+                })}
+              />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                {t("conversionEmpty")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Card className="animate-fade-rise">
+          <CardHeader>
+            <CardTitle className="text-base">{t("planBreakdownTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {planTotal > 0 ? (
+              <DonutChart
+                segments={reports.planBreakdown}
+                centerValue={String(planTotal)}
+              />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                {t("planBreakdownEmpty")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-rise [animation-delay:80ms]">
+          <CardHeader>
+            <CardTitle className="text-base">{t("statusBreakdownTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {statusTotal > 0 ? (
+              <MiniBars rows={reports.statusBreakdown} />
+            ) : (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                {t("statusBreakdownEmpty")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
