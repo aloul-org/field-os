@@ -142,6 +142,9 @@ export type CompanyRow = {
   voice_greeting: string | null;
   widget_public_key: string;
   widget_enabled: boolean;
+  platform_status: "active" | "suspended";
+  suspended_at: string | null;
+  suspended_reason: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -519,6 +522,12 @@ export type JobChecklistTemplateRow = {
   created_at: string;
 }
 
+/** A platform operator, not a tenant — grants cross-company access via /admin. */
+export type PlatformAdminRow = {
+  user_id: string;
+  created_at: string;
+}
+
 // ── Database type ──────────────────────────────────────────────────────────
 // Insert/Update are modelled as Partial<Row>: most columns carry DB defaults
 // (gen_random_uuid, now(), region/vat defaults, status enums, jsonb defaults),
@@ -650,6 +659,11 @@ export interface Database {
         InsertOf<JobsQueueRow>,
         UpdateOf<JobsQueueRow>
       >;
+      platform_admins: TableShape<
+        PlatformAdminRow,
+        InsertOf<PlatformAdminRow>,
+        UpdateOf<PlatformAdminRow>
+      >;
     };
     Views: Record<string, never>;
     Functions: {
@@ -660,6 +674,10 @@ export interface Database {
       get_user_role: {
         Args: { p_company_id: string };
         Returns: string;
+      };
+      is_platform_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
       };
       get_public_estimate: {
         Args: { p_token: string };

@@ -129,6 +129,7 @@ export async function getRouteContext(
 
   if (!resolved) return { error: "unauthorized" };
   const { ctx } = resolved;
+  if (ctx.company.platform_status === "suspended") return { error: "forbidden" };
   if (section && ctx.role !== "technician" && !canAccess(ctx.role, section)) {
     return { error: "forbidden" };
   }
@@ -151,6 +152,7 @@ export async function requireContext(): Promise<ActiveContext> {
   if (!user) redirect("/login");
   const ctx = await getActiveContext();
   if (!ctx) redirect("/onboarding/company");
+  if (ctx.company.platform_status === "suspended") redirect("/account-suspended");
   return ctx;
 }
 
